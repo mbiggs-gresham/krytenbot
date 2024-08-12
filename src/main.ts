@@ -1,6 +1,6 @@
+import { App, Octokit } from 'octokit'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { App, Octokit } from 'octokit'
 import { IssueCommentEvent, PullRequestEvent, PushEvent } from '@octokit/webhooks-types'
 import * as githubapi from './github-helper'
 import * as versions from './version-helper'
@@ -127,7 +127,7 @@ async function pushEvent(config: Config, octokit: Octokit): Promise<void> {
     for (const project of projectsOfRelevance) {
       core.startGroup(`Checking for draft release info for '${project.name}'`)
 
-      const releaseBranch: string = `krytenbot-${project.name}`
+      const releaseBranch = `krytenbot-${project.name}`
       const draftRelease: KrytenbotDraftRelease = await githubapi.findDraftRelease(octokit, project.name)
       const pullRequest = githubapi.getPullRequest(draftRelease)
       core.info(`Draft Release: ${JSON.stringify(draftRelease, null, 2)}`)
@@ -236,7 +236,7 @@ async function issueCommentEventSetVersion(config: Config, octokit: Octokit, dra
       const projectConfig = config.projects.find((projectConfig: ConfigProject) => projectConfig.name === project)
       if (projectConfig) {
         await githubapi.addCommentReaction(octokit, String(comment.comment.node_id), 'THUMBS_UP')
-        await githubapi.setReleaseBranchVersion(octokit, projectConfig['package-ecosystem']!, project, nextVersion, draftRelease.pullRequests.pullRequests[0].headRefOid)
+        await githubapi.setReleaseBranchVersion(octokit, projectConfig['package-ecosystem'], project, nextVersion, draftRelease.pullRequests.pullRequests[0].headRefOid)
         await githubapi.updatePullRequestTitleAndBody(octokit, draftRelease, project, nextVersion)
       }
     } catch (error) {

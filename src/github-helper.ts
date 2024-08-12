@@ -208,16 +208,16 @@ function addCommentMutation(): string {
     }`
 }
 
-function findRefQuery(): string {
-  return `
-    query FindRef($owner: String!, $repo: String!, $ref: String!) {
-        repository(owner: $owner, name: $repo) {
-            ref(qualifiedName: $ref) {
-                name
-            }
-        }
-    }`
-}
+// function findRefQuery(): string {
+//   return `
+//     query FindRef($owner: String!, $repo: String!, $ref: String!) {
+//         repository(owner: $owner, name: $repo) {
+//             ref(qualifiedName: $ref) {
+//                 name
+//             }
+//         }
+//     }`
+// }
 
 function getFileContentQuery(): string {
   return `
@@ -232,40 +232,40 @@ function getFileContentQuery(): string {
     }`
 }
 
-function findCommitQuery(): string {
-  return `
-    query FindCommit($owner: String!, $repo: String!, $oid: GitObjectID!) {
-        repository(owner: $owner, name: $repo) {
-            object(oid: $oid) {
-                ... on Commit {
-                    oid
-                    message
-                    changedFilesIfAvailable           
-                    tree {
-                       entries { 
-                          name
-                          path
-                       }
-                    }
-                    history(first: 1) {
-                        nodes {
-                            id
-                            oid
-                            message
-                            changedFiles
-                            tree {
-                              entries {
-                                name
-                                path
-                              }                            
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }`
-}
+// function findCommitQuery(): string {
+//   return `
+//     query FindCommit($owner: String!, $repo: String!, $oid: GitObjectID!) {
+//         repository(owner: $owner, name: $repo) {
+//             object(oid: $oid) {
+//                 ... on Commit {
+//                     oid
+//                     message
+//                     changedFilesIfAvailable
+//                     tree {
+//                        entries {
+//                           name
+//                           path
+//                        }
+//                     }
+//                     history(first: 1) {
+//                         nodes {
+//                             id
+//                             oid
+//                             message
+//                             changedFiles
+//                             tree {
+//                               entries {
+//                                 name
+//                                 path
+//                               }
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }`
+// }
 
 function findLatestTagQuery(): string {
   return `
@@ -478,7 +478,7 @@ export function listProjectsOfRelevance(projects: ConfigProject[], files: string
  * @param d1
  * @param d2
  */
-function daysBetween(d1: Date, d2: Date) {
+function daysBetween(d1: Date, d2: Date): number {
   const diff = Math.abs(d1.getTime() - d2.getTime())
   return diff / (1000 * 60 * 60 * 24)
 }
@@ -600,7 +600,7 @@ export async function findDraftRelease(octokit: Octokit, project: string): Promi
   const pullRequests: GraphQlQueryResponseData = await octokit.graphql(findDraftReleaseQuery(), {
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    project: project,
+    project,
     branch: getReleaseBranchName(project),
     labels: ['release', project]
   })
@@ -685,7 +685,7 @@ export async function createPullRequest(octokit: Octokit, draftRelease: Krytenbo
 export async function addComment(octokit: Octokit, issueId: string, body: string): Promise<void> {
   const response: GraphQlQueryResponseData = await octokit.graphql(addCommentMutation(), {
     subjectId: issueId,
-    body: body
+    body
   })
   core.debug(`Added comment: ${JSON.stringify(response, null, 2)}`)
 }
@@ -757,7 +757,7 @@ export async function findLastTag(octokit: Octokit, project: string): Promise<st
   const tag: GraphQlQueryResponseData = await octokit.graphql(findLatestTagQuery(), {
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    project: project
+    project
   })
   core.debug(`Found tag: ${JSON.stringify(tag, null, 2)}`)
   return tag.repository.tags.tags.length > 0 ? tag.repository.tags.tags[0].name : undefined
@@ -816,7 +816,7 @@ export async function publishGitHubRelease(octokit: Octokit, release_id: number,
   const updatedRelease: UpdateReleaseResponse = await octokit.rest.repos.updateRelease({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    release_id: release_id,
+    release_id,
     tag_name: `${project}@v${version}`,
     name: `${project}@v${version}`,
     body: releaseNotes,
@@ -838,7 +838,7 @@ export async function updateGitHubRelease(octokit: Octokit, release_id: number, 
   const updatedRelease: UpdateReleaseResponse = await octokit.rest.repos.updateRelease({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    release_id: release_id,
+    release_id,
     tag_name: `${project}@v${version}`,
     name: `${project}@v${version}`,
     body: releaseNotes

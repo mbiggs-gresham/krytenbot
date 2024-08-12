@@ -35289,10 +35289,6 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(2186);
-// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
-var github = __nccwpck_require__(5438);
 ;// CONCATENATED MODULE: ./node_modules/octokit/node_modules/universal-user-agent/index.js
 function getUserAgent() {
   if (typeof navigator === "object" && "userAgent" in navigator) {
@@ -49959,6 +49955,10 @@ var dist_bundle_App = App.defaults({ Octokit: dist_bundle_Octokit });
 var dist_bundle_OAuthApp = OAuthApp.defaults({ Octokit: dist_bundle_Octokit });
 
 
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(2186);
+// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
+var github = __nccwpck_require__(5438);
 // EXTERNAL MODULE: ./node_modules/brace-expansion/index.js
 var brace_expansion = __nccwpck_require__(3717);
 ;// CONCATENATED MODULE: ./node_modules/minimatch/dist/esm/assert-valid-pattern.js
@@ -51957,16 +51957,16 @@ function addCommentMutation() {
         }
     }`;
 }
-function findRefQuery() {
-    return `
-    query FindRef($owner: String!, $repo: String!, $ref: String!) {
-        repository(owner: $owner, name: $repo) {
-            ref(qualifiedName: $ref) {
-                name
-            }
-        }
-    }`;
-}
+// function findRefQuery(): string {
+//   return `
+//     query FindRef($owner: String!, $repo: String!, $ref: String!) {
+//         repository(owner: $owner, name: $repo) {
+//             ref(qualifiedName: $ref) {
+//                 name
+//             }
+//         }
+//     }`
+// }
 function getFileContentQuery() {
     return `
     query GetFileContent($owner: String!, $repo: String!, $ref: String!) {
@@ -51979,40 +51979,40 @@ function getFileContentQuery() {
         }
     }`;
 }
-function findCommitQuery() {
-    return `
-    query FindCommit($owner: String!, $repo: String!, $oid: GitObjectID!) {
-        repository(owner: $owner, name: $repo) {
-            object(oid: $oid) {
-                ... on Commit {
-                    oid
-                    message
-                    changedFilesIfAvailable           
-                    tree {
-                       entries { 
-                          name
-                          path
-                       }
-                    }
-                    history(first: 1) {
-                        nodes {
-                            id
-                            oid
-                            message
-                            changedFiles
-                            tree {
-                              entries {
-                                name
-                                path
-                              }                            
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }`;
-}
+// function findCommitQuery(): string {
+//   return `
+//     query FindCommit($owner: String!, $repo: String!, $oid: GitObjectID!) {
+//         repository(owner: $owner, name: $repo) {
+//             object(oid: $oid) {
+//                 ... on Commit {
+//                     oid
+//                     message
+//                     changedFilesIfAvailable
+//                     tree {
+//                        entries {
+//                           name
+//                           path
+//                        }
+//                     }
+//                     history(first: 1) {
+//                         nodes {
+//                             id
+//                             oid
+//                             message
+//                             changedFiles
+//                             tree {
+//                               entries {
+//                                 name
+//                                 path
+//                               }
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }`
+// }
 function findLatestTagQuery() {
     return `
     query FindLatestTag($owner: String!, $repo: String!, $project: String!) {
@@ -52317,7 +52317,7 @@ async function findDraftRelease(octokit, project) {
     const pullRequests = await octokit.graphql(findDraftReleaseQuery(), {
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
-        project: project,
+        project,
         branch: getReleaseBranchName(project),
         labels: ['release', project]
     });
@@ -52395,7 +52395,7 @@ async function createPullRequest(octokit, draftRelease, project, branch, nextVer
 async function addComment(octokit, issueId, body) {
     const response = await octokit.graphql(addCommentMutation(), {
         subjectId: issueId,
-        body: body
+        body
     });
     core.debug(`Added comment: ${JSON.stringify(response, null, 2)}`);
 }
@@ -52462,7 +52462,7 @@ async function findLastTag(octokit, project) {
     const tag = await octokit.graphql(findLatestTagQuery(), {
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
-        project: project
+        project
     });
     core.debug(`Found tag: ${JSON.stringify(tag, null, 2)}`);
     return tag.repository.tags.tags.length > 0 ? tag.repository.tags.tags[0].name : undefined;
@@ -52518,7 +52518,7 @@ async function publishGitHubRelease(octokit, release_id, project, version) {
     const updatedRelease = await octokit.rest.repos.updateRelease({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
-        release_id: release_id,
+        release_id,
         tag_name: `${project}@v${version}`,
         name: `${project}@v${version}`,
         body: releaseNotes,
@@ -52539,7 +52539,7 @@ async function updateGitHubRelease(octokit, release_id, project, version) {
     const updatedRelease = await octokit.rest.repos.updateRelease({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
-        release_id: release_id,
+        release_id,
         tag_name: `${project}@v${version}`,
         name: `${project}@v${version}`,
         body: releaseNotes

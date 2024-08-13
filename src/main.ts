@@ -22,7 +22,7 @@ const BOT_NAME = 'krytenbot[bot]'
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
-export async function run(): Promise<void> {
+export const run = async (): Promise<void> => {
   try {
     core.startGroup('GitHub Context')
     core.info(JSON.stringify(github.context, null, 2))
@@ -79,7 +79,7 @@ export async function run(): Promise<void> {
  * @param config
  * @param octokit
  */
-async function pullRequestEvent(config: Config, octokit: Octokit): Promise<void> {
+const pullRequestEvent = async (config: Config, octokit: Octokit): Promise<void> => {
   const pullRequestPayload: PullRequestEvent = github.context.payload as PullRequestEvent
 
   try {
@@ -109,7 +109,7 @@ async function pullRequestEvent(config: Config, octokit: Octokit): Promise<void>
  * @param config
  * @param octokit
  */
-async function pushEvent(config: Config, octokit: Octokit): Promise<void> {
+const pushEvent = async (config: Config, octokit: Octokit): Promise<void> => {
   const pushPayload: PushEvent = github.context.payload as PushEvent
 
   const wasReleasePush: boolean = pushPayload.commits.some(commit => commit.author.name === BOT_NAME)
@@ -190,7 +190,7 @@ async function pushEvent(config: Config, octokit: Octokit): Promise<void> {
  * @param config
  * @param octokit
  */
-async function issueCommentEvent(config: Config, octokit: Octokit): Promise<void> {
+const issueCommentEvent = async (config: Config, octokit: Octokit): Promise<void> => {
   const comment: IssueCommentEvent = github.context.payload as IssueCommentEvent
 
   const project = githubapi.extractProjectNameFromPR(comment.issue.body!)
@@ -224,7 +224,7 @@ async function issueCommentEvent(config: Config, octokit: Octokit): Promise<void
  * @param project
  * @param comment
  */
-async function issueCommentEventSetVersion(config: Config, octokit: Octokit, draftRelease: KrytenbotDraftRelease, project: string, comment: IssueCommentEvent): Promise<void> {
+const issueCommentEventSetVersion = async (config: Config, octokit: Octokit, draftRelease: KrytenbotDraftRelease, project: string, comment: IssueCommentEvent): Promise<void> => {
   const versionType = comment.comment.body.split(' ')[2]
   if (versions.isValidSemverVersionType(versionType)) {
     core.info(`Calculating new version for '${project}'`)
@@ -255,7 +255,7 @@ async function issueCommentEventSetVersion(config: Config, octokit: Octokit, dra
  * @param project
  * @param comment
  */
-async function issueCommentEventRebase(octokit: Octokit, draftRelease: KrytenbotDraftRelease, project: string, comment: IssueCommentEvent): Promise<void> {
+const issueCommentEventRebase = async (octokit: Octokit, draftRelease: KrytenbotDraftRelease, project: string, comment: IssueCommentEvent): Promise<void> => {
   core.info(`Updating release branch for '${project}'`)
   try {
     await githubapi.addCommentReaction(octokit, String(comment.comment.node_id), 'THUMBS_UP')
@@ -274,7 +274,7 @@ async function issueCommentEventRebase(octokit: Octokit, draftRelease: Krytenbot
  * @param project
  * @param comment
  */
-async function issueCommentEventRecreate(config: Config, octokit: Octokit, draftRelease: KrytenbotDraftRelease, project: string, comment: IssueCommentEvent): Promise<void> {
+const issueCommentEventRecreate = async (config: Config, octokit: Octokit, draftRelease: KrytenbotDraftRelease, project: string, comment: IssueCommentEvent): Promise<void> => {
   core.info(`Recreating release branch for '${project}'`)
   try {
     await githubapi.addCommentReaction(octokit, String(comment.comment.node_id), 'THUMBS_UP')

@@ -50,6 +50,7 @@ rules:
     'no-shadow': 'off',
     'prettier/prettier': 'error',
     'semi': 'off',
+    'func-style': ['error', 'expression'],
     'github/array-foreach': 'off',
     '@typescript-eslint/array-type': 'error',
     '@typescript-eslint/await-thenable': 'error',

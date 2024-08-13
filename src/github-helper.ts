@@ -64,6 +64,9 @@ export interface PullRequest {
   headRefName: string
   headRefOid: string
   comments: Comments
+  author: {
+    login: string
+  }
 }
 
 export interface PullRequests {
@@ -89,7 +92,7 @@ export enum Commands {
   SetVersion = '@krytenbot setversion'
 }
 
-function createRefMutation(): string {
+const createRefMutation = (): string => {
   return `
     mutation CreateRef($repositoryId: ID!, $name: String!, $oid: GitObjectID!) {
         createRef(input:{ clientMutationId: "krytenbot", repositoryId: $repositoryId, name: $name, oid: $oid }) {
@@ -103,7 +106,7 @@ function createRefMutation(): string {
     }`
 }
 
-function updateRefMutation(): string {
+const updateRefMutation = (): string => {
   return `
     mutation UpdateRef($refId: ID!, $oid: GitObjectID!) {
         updateRef(input:{ clientMutationId: "krytenbot", refId: $refId, oid: $oid, force: true }) {
@@ -117,7 +120,7 @@ function updateRefMutation(): string {
     }`
 }
 
-function createCommitOnBranchMutation(): string {
+const createCommitOnBranchMutation = (): string => {
   return `
     mutation CreateCommitOnBranch($branch: CommittableBranch!, $message: CommitMessage!, $expectedHeadOid: GitObjectID!, $fileChanges: FileChanges) {
         createCommitOnBranch(input:{ clientMutationId: "krytenbot", branch: $branch, message: $message, expectedHeadOid: $expectedHeadOid, fileChanges: $fileChanges }) {
@@ -128,7 +131,7 @@ function createCommitOnBranchMutation(): string {
     }`
 }
 
-function createPullRequestMutation(): string {
+const createPullRequestMutation = (): string => {
   return `
     mutation CreatePullRequest($repositoryId: ID!, $baseRefName: String!, $headRefName: String!, $title: String!, $body: String!) {
         createPullRequest(input:{ clientMutationId: "krytenbot", repositoryId: $repositoryId, baseRefName: $baseRefName, headRefName: $headRefName, title: $title, body: $body, draft: true }) {
@@ -139,7 +142,7 @@ function createPullRequestMutation(): string {
     }`
 }
 
-function updatePullRequestLabelsMutation(): string {
+const updatePullRequestLabelsMutation = (): string => {
   return `
     mutation UpdatePullRequestLabels($pullRequestId: ID!, $labelIds: [ID!]) {
         updatePullRequest(input:{ clientMutationId: "krytenbot", pullRequestId: $pullRequestId, labelIds: $labelIds }) {
@@ -150,7 +153,7 @@ function updatePullRequestLabelsMutation(): string {
     }`
 }
 
-function updatePullRequestTitleAndBodyMutation(): string {
+const updatePullRequestTitleAndBodyMutation = (): string => {
   return `
     mutation UpdatePullRequestLabels($pullRequestId: ID!, $title: String, $body: String) {
         updatePullRequest(input:{ clientMutationId: "krytenbot", pullRequestId: $pullRequestId, title: $title, body: $body }) {
@@ -161,7 +164,7 @@ function updatePullRequestTitleAndBodyMutation(): string {
     }`
 }
 
-function updatePullRequestBranchMutation(): string {
+const updatePullRequestBranchMutation = (): string => {
   return `
     mutation UpdatePullRequestBranch($pullRequestId: ID!) {
         updatePullRequestBranch(input:{ clientMutationId: "krytenbot", pullRequestId: $pullRequestId, updateMethod: REBASE }) {
@@ -172,7 +175,7 @@ function updatePullRequestBranchMutation(): string {
     }`
 }
 
-function reopenPullRequestMutation(): string {
+const reopenPullRequestMutation = (): string => {
   return `
     mutation ReopenPullRequest($pullRequestId: ID!) {
         reopenPullRequest(input:{ clientMutationId: "krytenbot", pullRequestId: $pullRequestId }) {
@@ -183,7 +186,7 @@ function reopenPullRequestMutation(): string {
     }`
 }
 
-function addReactionMutation(): string {
+const addReactionMutation = (): string => {
   return `
     mutation AddReaction($subjectId: ID!, $content: ReactionContent!) {
         addReaction(input:{ clientMutationId: "krytenbot", subjectId: $subjectId, content: $content }) {
@@ -197,7 +200,7 @@ function addReactionMutation(): string {
     }`
 }
 
-function addCommentMutation(): string {
+const addCommentMutation = (): string => {
   return `
     mutation AddPullRequestComment($subjectId: ID!, $body: String!) {
         addComment(input:{ clientMutationId: "krytenbot", subjectId: $subjectId, body: $body }) {            
@@ -208,7 +211,7 @@ function addCommentMutation(): string {
     }`
 }
 
-// function findRefQuery(): string {
+// const findRefQuery = (): string => {
 //   return `
 //     query FindRef($owner: String!, $repo: String!, $ref: String!) {
 //         repository(owner: $owner, name: $repo) {
@@ -219,7 +222,7 @@ function addCommentMutation(): string {
 //     }`
 // }
 
-function getFileContentQuery(): string {
+const getFileContentQuery = (): string => {
   return `
     query GetFileContent($owner: String!, $repo: String!, $ref: String!) {
         repository(owner: $owner, name: $repo) {
@@ -232,7 +235,7 @@ function getFileContentQuery(): string {
     }`
 }
 
-// function findCommitQuery(): string {
+// const findCommitQuery = (): string => {
 //   return `
 //     query FindCommit($owner: String!, $repo: String!, $oid: GitObjectID!) {
 //         repository(owner: $owner, name: $repo) {
@@ -267,7 +270,7 @@ function getFileContentQuery(): string {
 //     }`
 // }
 
-function findLatestTagQuery(): string {
+const findLatestTagQuery = (): string => {
   return `
     query FindLatestTag($owner: String!, $repo: String!, $project: String!) {
         repository(owner: $owner, name: $repo) {
@@ -281,7 +284,7 @@ function findLatestTagQuery(): string {
     }`
 }
 
-function findDraftReleaseQuery(): string {
+const findDraftReleaseQuery = (): string => {
   return `
     query FindDraftRelease ($owner: String!, $repo: String!, $project: String!, $branch: String!, $labels: [String!]){
         repository(owner: $owner, name: $repo) {
@@ -337,12 +340,12 @@ function findDraftReleaseQuery(): string {
     }`
 }
 
-export function extractProjectNameFromPR(text: string): string | null {
+export const extractProjectNameFromPR = (text: string): string | null => {
   const match = text.match(/\[\/\/]:\s#\s\(krytenbot-project:(\w+)\)/)
   return match ? match[1] : null
 }
 
-export function extractProjectVersionFromPR(text: string): string | null {
+export const extractProjectVersionFromPR = (text: string): string | null => {
   const match = text.match(/\[\/\/]:\s#\s\(krytenbot-version:(\d+\.\d+\.\d+)\)/)
   return match ? match[1] : null
 }
@@ -351,7 +354,7 @@ export function extractProjectVersionFromPR(text: string): string | null {
  * Get the release branch name for the project.
  * @param project
  */
-export function getReleaseBranchName(project: string): string {
+export const getReleaseBranchName = (project: string): string => {
   return `krytenbot-${project}`
 }
 
@@ -360,14 +363,14 @@ export function getReleaseBranchName(project: string): string {
  * @param project
  * @param nextVersion
  */
-function getPullRequestTitle(project: string, nextVersion: string): string {
+const getPullRequestTitle = (project: string, nextVersion: string): string => {
   return `Release \`${project}\` v${nextVersion}`
 }
 
 /**
  * Get the default next version.
  */
-function getDefaultNextVersion(): string {
+const getDefaultNextVersion = (): string => {
   return '0.0.1'
 }
 
@@ -378,7 +381,7 @@ function getDefaultNextVersion(): string {
  * @param githubReleaseUrl
  * @param rebasing
  */
-function getPullRequestBody(project: string, nextVersion: string, githubReleaseUrl: string, rebasing: boolean = false): string {
+const getPullRequestBody = (project: string, nextVersion: string, githubReleaseUrl: string, rebasing: boolean = false): string => {
   const body: string[] = []
 
   body.push(hidden(`krytenbot-project:${project}`))
@@ -422,7 +425,7 @@ You can trigger Krytenbot actions by commenting on this PR:
  * @param octokit
  * @param payload
  */
-export async function listPushCommitFiles(octokit: Octokit, payload: PushEvent): Promise<string[]> {
+export const listPushCommitFiles = async (octokit: Octokit, payload: PushEvent): Promise<string[]> => {
   const files = new Set<string>()
 
   // If the push event has a list of commits, use that to get the list of files, otherwise
@@ -459,7 +462,7 @@ export async function listPushCommitFiles(octokit: Octokit, payload: PushEvent):
  * @param projects
  * @param files
  */
-export function listProjectsOfRelevance(projects: ConfigProject[], files: string[]): ConfigProject[] {
+export const listProjectsOfRelevance = (projects: ConfigProject[], files: string[]): ConfigProject[] => {
   const relevantProjects = new Set<ConfigProject>()
   files.forEach(file => {
     projects.forEach(project => {
@@ -478,16 +481,16 @@ export function listProjectsOfRelevance(projects: ConfigProject[], files: string
  * @param d1
  * @param d2
  */
-function daysBetween(d1: Date, d2: Date): number {
+const daysBetween = (d1: Date, d2: Date): number => {
   const diff = Math.abs(d1.getTime() - d2.getTime())
   return diff / (1000 * 60 * 60 * 24)
 }
 
 /**
- * Helper function to get the pull request from the draft release.
+ * Helper const to get the pull request from the draft release.
  * @param draftRelease
  */
-export function getPullRequest(draftRelease: KrytenbotDraftRelease): PullRequest | undefined {
+export const getPullRequest = (draftRelease: KrytenbotDraftRelease): PullRequest | undefined => {
   return draftRelease.pullRequests.pullRequests.length > 0 ? draftRelease.pullRequests.pullRequests[0] : undefined
 }
 
@@ -495,7 +498,7 @@ export function getPullRequest(draftRelease: KrytenbotDraftRelease): PullRequest
  * Get the last comment on the pull request.
  * @param draftRelease
  */
-export function getLastComment(draftRelease: KrytenbotDraftRelease): Comment | undefined {
+export const getLastComment = (draftRelease: KrytenbotDraftRelease): Comment | undefined => {
   const pullRequest = getPullRequest(draftRelease)
   if (pullRequest) {
     if (pullRequest.comments.comments.length > 0) {
@@ -510,7 +513,7 @@ export function getLastComment(draftRelease: KrytenbotDraftRelease): Comment | u
  * @param draftRelease
  * @param limit
  */
-export function isPullRequestTooOld(draftRelease: KrytenbotDraftRelease, limit: number): boolean {
+export const isPullRequestTooOld = (draftRelease: KrytenbotDraftRelease, limit: number): boolean => {
   const pullRequest = getPullRequest(draftRelease)
   if (pullRequest) {
     const daysOld = daysBetween(new Date(pullRequest.createdAt), new Date())
@@ -527,7 +530,7 @@ export function isPullRequestTooOld(draftRelease: KrytenbotDraftRelease, limit: 
  * @param version
  * @param sha
  */
-export async function setReleaseBranchVersion(octokit: Octokit, packageEcoSystem: string, project: string, version: string, sha: string): Promise<void> {
+export const setReleaseBranchVersion = async (octokit: Octokit, packageEcoSystem: string, project: string, version: string, sha: string): Promise<void> => {
   const branch: string = getReleaseBranchName(project)
 
   const {
@@ -564,7 +567,7 @@ export async function setReleaseBranchVersion(octokit: Octokit, packageEcoSystem
  * @param draftRelease
  * @param versionType
  */
-export function getNextVersion(draftRelease: KrytenbotDraftRelease, versionType: Version): string {
+export const getNextVersion = (draftRelease: KrytenbotDraftRelease, versionType: Version): string => {
   for (const tag of draftRelease.tags.tags) {
     const tagName = tag.name
     const tagVersion = tagName.substring(tagName.indexOf('@v') + 2)
@@ -599,7 +602,7 @@ export function getNextVersion(draftRelease: KrytenbotDraftRelease, versionType:
  * @param octokit
  * @param project
  */
-export async function findDraftRelease(octokit: Octokit, project: string): Promise<KrytenbotDraftRelease> {
+export const findDraftRelease = async (octokit: Octokit, project: string): Promise<KrytenbotDraftRelease> => {
   const pullRequests: GraphQlQueryResponseData = await octokit.graphql(findDraftReleaseQuery(), {
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
@@ -617,7 +620,7 @@ export async function findDraftRelease(octokit: Octokit, project: string): Promi
  * @param draftRelease
  * @param project
  */
-export async function createReleaseBranch(octokit: Octokit, draftRelease: KrytenbotDraftRelease, project: string): Promise<void> {
+export const createReleaseBranch = async (octokit: Octokit, draftRelease: KrytenbotDraftRelease, project: string): Promise<void> => {
   const releaseBranch: string = getReleaseBranchName(project)
   const branch: GraphQlQueryResponseData = await octokit.graphql(createRefMutation(), {
     repositoryId: draftRelease.id,
@@ -632,7 +635,7 @@ export async function createReleaseBranch(octokit: Octokit, draftRelease: Kryten
  * @param octokit
  * @param draftRelease
  */
-export async function updateReleaseBranch(octokit: Octokit, draftRelease: KrytenbotDraftRelease): Promise<void> {
+export const updateReleaseBranch = async (octokit: Octokit, draftRelease: KrytenbotDraftRelease): Promise<void> => {
   const branch: GraphQlQueryResponseData = await octokit.graphql(updatePullRequestBranchMutation(), {
     pullRequestId: draftRelease.pullRequests.pullRequests[0].id
   })
@@ -644,7 +647,7 @@ export async function updateReleaseBranch(octokit: Octokit, draftRelease: Kryten
  * @param octokit
  * @param draftRelease
  */
-export async function recreateReleaseBranch(octokit: Octokit, draftRelease: KrytenbotDraftRelease): Promise<void> {
+export const recreateReleaseBranch = async (octokit: Octokit, draftRelease: KrytenbotDraftRelease): Promise<void> => {
   const branch: GraphQlQueryResponseData = await octokit.graphql(updateRefMutation(), {
     refId: draftRelease.branches.branches[0].id,
     oid: github.context.sha
@@ -660,7 +663,7 @@ export async function recreateReleaseBranch(octokit: Octokit, draftRelease: Kryt
  * @param branch
  * @param nextVersion
  */
-export async function createPullRequest(octokit: Octokit, draftRelease: KrytenbotDraftRelease, project: string, branch: string, nextVersion: string): Promise<void> {
+export const createPullRequest = async (octokit: Octokit, draftRelease: KrytenbotDraftRelease, project: string, branch: string, nextVersion: string): Promise<void> => {
   const releaseBranch: string = getReleaseBranchName(project)
 
   const pullRequest: GraphQlQueryResponseData = await octokit.graphql(createPullRequestMutation(), {
@@ -685,7 +688,7 @@ export async function createPullRequest(octokit: Octokit, draftRelease: Krytenbo
  * @param issueId
  * @param body
  */
-export async function addComment(octokit: Octokit, issueId: string, body: string): Promise<void> {
+export const addComment = async (octokit: Octokit, issueId: string, body: string): Promise<void> => {
   const response: GraphQlQueryResponseData = await octokit.graphql(addCommentMutation(), {
     subjectId: issueId,
     body
@@ -699,7 +702,7 @@ export async function addComment(octokit: Octokit, issueId: string, body: string
  * @param draftRelease
  * @param body
  */
-export async function addCommentIfRequired(octokit: Octokit, draftRelease: KrytenbotDraftRelease, body: string): Promise<void> {
+export const addCommentIfRequired = async (octokit: Octokit, draftRelease: KrytenbotDraftRelease, body: string): Promise<void> => {
   const pullRequest = getPullRequest(draftRelease)
   if (pullRequest) {
     const lastComment = getLastComment(draftRelease)
@@ -715,7 +718,7 @@ export async function addCommentIfRequired(octokit: Octokit, draftRelease: Kryte
  * @param commentId
  * @param reaction
  */
-export async function addCommentReaction(octokit: Octokit, commentId: string, reaction: Reaction): Promise<void> {
+export const addCommentReaction = async (octokit: Octokit, commentId: string, reaction: Reaction): Promise<void> => {
   const response: GraphQlQueryResponseData = await octokit.graphql(addReactionMutation(), {
     subjectId: commentId,
     content: reaction
@@ -730,7 +733,7 @@ export async function addCommentReaction(octokit: Octokit, commentId: string, re
  * @param project
  * @param nextVersion
  */
-export async function updatePullRequestTitleAndBody(octokit: Octokit, draftRelease: KrytenbotDraftRelease, project: string, nextVersion: string): Promise<void> {
+export const updatePullRequestTitleAndBody = async (octokit: Octokit, draftRelease: KrytenbotDraftRelease, project: string, nextVersion: string): Promise<void> => {
   const pullRequestLabels: GraphQlQueryResponseData = await octokit.graphql(updatePullRequestTitleAndBodyMutation(), {
     pullRequestId: draftRelease.pullRequests.pullRequests[0].id,
     title: getPullRequestTitle(project, nextVersion),
@@ -744,7 +747,7 @@ export async function updatePullRequestTitleAndBody(octokit: Octokit, draftRelea
  * @param octokit
  * @param draftRelease
  */
-export async function reopenPullRequest(octokit: Octokit, draftRelease: KrytenbotDraftRelease): Promise<void> {
+export const reopenPullRequest = async (octokit: Octokit, draftRelease: KrytenbotDraftRelease): Promise<void> => {
   const pullRequestLabels: GraphQlQueryResponseData = await octokit.graphql(reopenPullRequestMutation(), {
     pullRequestId: draftRelease.pullRequests.pullRequests[0].id
   })
@@ -756,7 +759,7 @@ export async function reopenPullRequest(octokit: Octokit, draftRelease: Krytenbo
  * @param octokit
  * @param project
  */
-export async function findLastTag(octokit: Octokit, project: string): Promise<string | undefined> {
+export const findLastTag = async (octokit: Octokit, project: string): Promise<string | undefined> => {
   const tag: GraphQlQueryResponseData = await octokit.graphql(findLatestTagQuery(), {
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
@@ -772,7 +775,7 @@ export async function findLastTag(octokit: Octokit, project: string): Promise<st
  * @param project
  * @param version
  */
-export async function generateGithubReleaseNotes(octokit: Octokit, project: string, version: string): Promise<string> {
+export const generateGithubReleaseNotes = async (octokit: Octokit, project: string, version: string): Promise<string> => {
   const lastTag = await findLastTag(octokit, project)
   const releaseNotes: GenerateReleaseNotesResponse = await octokit.rest.repos.generateReleaseNotes({
     owner: github.context.repo.owner,
@@ -791,7 +794,7 @@ export async function generateGithubReleaseNotes(octokit: Octokit, project: stri
  * @param project
  * @param version
  */
-export async function createGitHubRelease(octokit: Octokit, project: string, version: string): Promise<GitDraftHubRelease | undefined> {
+export const createGitHubRelease = async (octokit: Octokit, project: string, version: string): Promise<GitDraftHubRelease | undefined> => {
   const lastTag = await findLastTag(octokit, project)
   const releaseNotes = await generateGithubReleaseNotes(octokit, project, version)
   const release: CreateReleaseResponse = await octokit.rest.repos.createRelease({
@@ -814,7 +817,7 @@ export async function createGitHubRelease(octokit: Octokit, project: string, ver
  * @param project
  * @param version
  */
-export async function publishGitHubRelease(octokit: Octokit, release_id: number, project: string, version: string): Promise<GitDraftHubRelease> {
+export const publishGitHubRelease = async (octokit: Octokit, release_id: number, project: string, version: string): Promise<GitDraftHubRelease> => {
   const releaseNotes = await generateGithubReleaseNotes(octokit, project, version)
   const updatedRelease: UpdateReleaseResponse = await octokit.rest.repos.updateRelease({
     owner: github.context.repo.owner,
@@ -836,7 +839,7 @@ export async function publishGitHubRelease(octokit: Octokit, release_id: number,
  * @param project
  * @param version
  */
-export async function updateGitHubRelease(octokit: Octokit, release_id: number, project: string, version: string): Promise<GitDraftHubRelease> {
+export const updateGitHubRelease = async (octokit: Octokit, release_id: number, project: string, version: string): Promise<GitDraftHubRelease> => {
   const releaseNotes = await generateGithubReleaseNotes(octokit, project, version)
   const updatedRelease: UpdateReleaseResponse = await octokit.rest.repos.updateRelease({
     owner: github.context.repo.owner,
@@ -856,7 +859,7 @@ export async function updateGitHubRelease(octokit: Octokit, release_id: number, 
  * @param project
  * @param version
  */
-export async function findGitHubDraftRelease(octokit: Octokit, project: string, version: string): Promise<GitDraftHubRelease | undefined> {
+export const findGitHubDraftRelease = async (octokit: Octokit, project: string, version: string): Promise<GitDraftHubRelease | undefined> => {
   const releases: ListReleasesResponse = await octokit.rest.repos.listReleases({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo

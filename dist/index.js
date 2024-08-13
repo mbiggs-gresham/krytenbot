@@ -47069,78 +47069,78 @@ const semverVersionTypes = ['major', 'minor', 'patch'];
  * @param fileContents
  * @param nextVersion
  */
-function patchPackageJson(fileContents, nextVersion) {
+const patchPackageJson = (fileContents, nextVersion) => {
     return fileContents.replace(/"version": "(.*)"/, `"version": "${nextVersion}"`);
-}
+};
 /**
  * This function will take the contents of a file and replace the version number with the next version number.
  * @param packageEcoSystem
  * @param fileContents
  * @param nextVersion
  */
-function patchVersion(packageEcoSystem, fileContents, nextVersion) {
+const patchVersion = (packageEcoSystem, fileContents, nextVersion) => {
     switch (packageEcoSystem) {
         case 'npm':
             return patchPackageJson(fileContents, nextVersion);
         default:
             throw new Error(`Unsupported package ecosystem: ${packageEcoSystem}`);
     }
-}
+};
 /**
  * This function will take a package ecosystem and return the path to the package file.
  * @param packageEcoSystem
  */
-function getPackagePath(packageEcoSystem) {
+const getPackagePath = (packageEcoSystem) => {
     switch (packageEcoSystem) {
         case 'npm':
             return 'package.json';
         default:
             throw new Error(`Unsupported package ecosystem: ${packageEcoSystem}`);
     }
-}
+};
 /**
  * This function will take a version number and return the next version number based on the version type.
  * @param version
  */
-function isValidSemverVersionType(version) {
+const isValidSemverVersionType = (version) => {
     return semverVersionTypes.includes(version);
-}
+};
 
 ;// CONCATENATED MODULE: ./src/base64-helper.ts
 /**
  * Encode a string to base64.
  * @param input
  */
-function encode(input) {
+const encode = (input) => {
     return Buffer.from(input, 'utf-8').toString('base64');
-}
+};
 /**
  * Decode a base64 encoded string.
  * @param input
  */
-function decode(input) {
+const decode = (input) => {
     return Buffer.from(input, 'base64').toString('utf-8');
-}
+};
 
 ;// CONCATENATED MODULE: ./src/markdown.ts
-function note(message) {
+const note = (message) => {
     return `> [!NOTE]\n> ${message}`;
-}
-function tip(message) {
+};
+const tip = (message) => {
     return `> [!TIP]\n> ${message}`;
-}
-function important(message) {
+};
+const important = (message) => {
     return `> [!IMPORTANT]\n> ${message}`;
-}
-function warning(message) {
+};
+const warning = (message) => {
     return `> [!WARNING]\n> ${message}`;
-}
-function caution(message) {
+};
+const caution = (message) => {
     return `> [!CAUTION]\n> ${message}`;
-}
-function markdown_hidden(message) {
+};
+const markdown_hidden = (message) => {
     return `[//]: # (${message})`;
-}
+};
 
 ;// CONCATENATED MODULE: ./src/github-helper.ts
 
@@ -47156,7 +47156,7 @@ var Commands;
     Commands["Recreate"] = "@krytenbot recreate";
     Commands["SetVersion"] = "@krytenbot setversion";
 })(Commands || (Commands = {}));
-function createRefMutation() {
+const createRefMutation = () => {
     return `
     mutation CreateRef($repositoryId: ID!, $name: String!, $oid: GitObjectID!) {
         createRef(input:{ clientMutationId: "krytenbot", repositoryId: $repositoryId, name: $name, oid: $oid }) {
@@ -47168,8 +47168,8 @@ function createRefMutation() {
             }
         }
     }`;
-}
-function updateRefMutation() {
+};
+const updateRefMutation = () => {
     return `
     mutation UpdateRef($refId: ID!, $oid: GitObjectID!) {
         updateRef(input:{ clientMutationId: "krytenbot", refId: $refId, oid: $oid, force: true }) {
@@ -47181,8 +47181,8 @@ function updateRefMutation() {
             }
         }
     }`;
-}
-function createCommitOnBranchMutation() {
+};
+const createCommitOnBranchMutation = () => {
     return `
     mutation CreateCommitOnBranch($branch: CommittableBranch!, $message: CommitMessage!, $expectedHeadOid: GitObjectID!, $fileChanges: FileChanges) {
         createCommitOnBranch(input:{ clientMutationId: "krytenbot", branch: $branch, message: $message, expectedHeadOid: $expectedHeadOid, fileChanges: $fileChanges }) {
@@ -47191,8 +47191,8 @@ function createCommitOnBranchMutation() {
             }
         }
     }`;
-}
-function createPullRequestMutation() {
+};
+const createPullRequestMutation = () => {
     return `
     mutation CreatePullRequest($repositoryId: ID!, $baseRefName: String!, $headRefName: String!, $title: String!, $body: String!) {
         createPullRequest(input:{ clientMutationId: "krytenbot", repositoryId: $repositoryId, baseRefName: $baseRefName, headRefName: $headRefName, title: $title, body: $body, draft: true }) {
@@ -47201,8 +47201,8 @@ function createPullRequestMutation() {
             }
         }
     }`;
-}
-function updatePullRequestLabelsMutation() {
+};
+const updatePullRequestLabelsMutation = () => {
     return `
     mutation UpdatePullRequestLabels($pullRequestId: ID!, $labelIds: [ID!]) {
         updatePullRequest(input:{ clientMutationId: "krytenbot", pullRequestId: $pullRequestId, labelIds: $labelIds }) {
@@ -47211,8 +47211,8 @@ function updatePullRequestLabelsMutation() {
             }
         }
     }`;
-}
-function updatePullRequestTitleAndBodyMutation() {
+};
+const updatePullRequestTitleAndBodyMutation = () => {
     return `
     mutation UpdatePullRequestLabels($pullRequestId: ID!, $title: String, $body: String) {
         updatePullRequest(input:{ clientMutationId: "krytenbot", pullRequestId: $pullRequestId, title: $title, body: $body }) {
@@ -47221,8 +47221,8 @@ function updatePullRequestTitleAndBodyMutation() {
             }
         }
     }`;
-}
-function updatePullRequestBranchMutation() {
+};
+const updatePullRequestBranchMutation = () => {
     return `
     mutation UpdatePullRequestBranch($pullRequestId: ID!) {
         updatePullRequestBranch(input:{ clientMutationId: "krytenbot", pullRequestId: $pullRequestId, updateMethod: REBASE }) {
@@ -47231,8 +47231,8 @@ function updatePullRequestBranchMutation() {
             }
         }
     }`;
-}
-function reopenPullRequestMutation() {
+};
+const reopenPullRequestMutation = () => {
     return `
     mutation ReopenPullRequest($pullRequestId: ID!) {
         reopenPullRequest(input:{ clientMutationId: "krytenbot", pullRequestId: $pullRequestId }) {
@@ -47241,8 +47241,8 @@ function reopenPullRequestMutation() {
             }
         }
     }`;
-}
-function addReactionMutation() {
+};
+const addReactionMutation = () => {
     return `
     mutation AddReaction($subjectId: ID!, $content: ReactionContent!) {
         addReaction(input:{ clientMutationId: "krytenbot", subjectId: $subjectId, content: $content }) {
@@ -47254,8 +47254,8 @@ function addReactionMutation() {
             }
         }
     }`;
-}
-function addCommentMutation() {
+};
+const addCommentMutation = () => {
     return `
     mutation AddPullRequestComment($subjectId: ID!, $body: String!) {
         addComment(input:{ clientMutationId: "krytenbot", subjectId: $subjectId, body: $body }) {            
@@ -47264,8 +47264,8 @@ function addCommentMutation() {
             }
         }
     }`;
-}
-// function findRefQuery(): string {
+};
+// const findRefQuery = (): string => {
 //   return `
 //     query FindRef($owner: String!, $repo: String!, $ref: String!) {
 //         repository(owner: $owner, name: $repo) {
@@ -47275,7 +47275,7 @@ function addCommentMutation() {
 //         }
 //     }`
 // }
-function getFileContentQuery() {
+const getFileContentQuery = () => {
     return `
     query GetFileContent($owner: String!, $repo: String!, $ref: String!) {
         repository(owner: $owner, name: $repo) {
@@ -47286,8 +47286,8 @@ function getFileContentQuery() {
               }
         }
     }`;
-}
-// function findCommitQuery(): string {
+};
+// const findCommitQuery = (): string => {
 //   return `
 //     query FindCommit($owner: String!, $repo: String!, $oid: GitObjectID!) {
 //         repository(owner: $owner, name: $repo) {
@@ -47321,7 +47321,7 @@ function getFileContentQuery() {
 //         }
 //     }`
 // }
-function findLatestTagQuery() {
+const findLatestTagQuery = () => {
     return `
     query FindLatestTag($owner: String!, $repo: String!, $project: String!) {
         repository(owner: $owner, name: $repo) {
@@ -47333,8 +47333,8 @@ function findLatestTagQuery() {
             }
         }
     }`;
-}
-function findDraftReleaseQuery() {
+};
+const findDraftReleaseQuery = () => {
     return `
     query FindDraftRelease ($owner: String!, $repo: String!, $project: String!, $branch: String!, $labels: [String!]){
         repository(owner: $owner, name: $repo) {
@@ -47388,36 +47388,36 @@ function findDraftReleaseQuery() {
               }
           }
     }`;
-}
-function extractProjectNameFromPR(text) {
+};
+const extractProjectNameFromPR = (text) => {
     const match = text.match(/\[\/\/]:\s#\s\(krytenbot-project:(\w+)\)/);
     return match ? match[1] : null;
-}
-function extractProjectVersionFromPR(text) {
+};
+const extractProjectVersionFromPR = (text) => {
     const match = text.match(/\[\/\/]:\s#\s\(krytenbot-version:(\d+\.\d+\.\d+)\)/);
     return match ? match[1] : null;
-}
+};
 /**
  * Get the release branch name for the project.
  * @param project
  */
-function getReleaseBranchName(project) {
+const getReleaseBranchName = (project) => {
     return `krytenbot-${project}`;
-}
+};
 /**
  * Get the title for the PR.
  * @param project
  * @param nextVersion
  */
-function getPullRequestTitle(project, nextVersion) {
+const getPullRequestTitle = (project, nextVersion) => {
     return `Release \`${project}\` v${nextVersion}`;
-}
+};
 /**
  * Get the default next version.
  */
-function getDefaultNextVersion() {
+const getDefaultNextVersion = () => {
     return '0.0.1';
-}
+};
 /**
  * Return the body of the PR text.
  * @param project
@@ -47425,7 +47425,7 @@ function getDefaultNextVersion() {
  * @param githubReleaseUrl
  * @param rebasing
  */
-function getPullRequestBody(project, nextVersion, githubReleaseUrl, rebasing = false) {
+const getPullRequestBody = (project, nextVersion, githubReleaseUrl, rebasing = false) => {
     const body = [];
     body.push(markdown_hidden(`krytenbot-project:${project}`));
     body.push('\n');
@@ -47458,13 +47458,13 @@ You can trigger Krytenbot actions by commenting on this PR:
 </details>
   `);
     return body.join('');
-}
+};
 /**
  * List all files that were added, modified, or removed in the push event.
  * @param octokit
  * @param payload
  */
-async function listPushCommitFiles(octokit, payload) {
+const listPushCommitFiles = async (octokit, payload) => {
     const files = new Set();
     // If the push event has a list of commits, use that to get the list of files, otherwise
     // get the list of files from the commit details.
@@ -47492,13 +47492,13 @@ async function listPushCommitFiles(octokit, payload) {
         }
     }
     return Array.from(files);
-}
+};
 /**
  * List all projects that are relevant to the files that were changed.
  * @param projects
  * @param files
  */
-function listProjectsOfRelevance(projects, files) {
+const listProjectsOfRelevance = (projects, files) => {
     const relevantProjects = new Set();
     files.forEach(file => {
         projects.forEach(project => {
@@ -47510,28 +47510,28 @@ function listProjectsOfRelevance(projects, files) {
         });
     });
     return Array.from(relevantProjects);
-}
+};
 /**
  * Get the number of days between two dates.
  * @param d1
  * @param d2
  */
-function daysBetween(d1, d2) {
+const daysBetween = (d1, d2) => {
     const diff = Math.abs(d1.getTime() - d2.getTime());
     return diff / (1000 * 60 * 60 * 24);
-}
+};
 /**
- * Helper function to get the pull request from the draft release.
+ * Helper const to get the pull request from the draft release.
  * @param draftRelease
  */
-function getPullRequest(draftRelease) {
+const getPullRequest = (draftRelease) => {
     return draftRelease.pullRequests.pullRequests.length > 0 ? draftRelease.pullRequests.pullRequests[0] : undefined;
-}
+};
 /**
  * Get the last comment on the pull request.
  * @param draftRelease
  */
-function getLastComment(draftRelease) {
+const getLastComment = (draftRelease) => {
     const pullRequest = getPullRequest(draftRelease);
     if (pullRequest) {
         if (pullRequest.comments.comments.length > 0) {
@@ -47539,20 +47539,20 @@ function getLastComment(draftRelease) {
         }
     }
     return undefined;
-}
+};
 /**
  * Check if the pull request is too old.
  * @param draftRelease
  * @param limit
  */
-function isPullRequestTooOld(draftRelease, limit) {
+const isPullRequestTooOld = (draftRelease, limit) => {
     const pullRequest = getPullRequest(draftRelease);
     if (pullRequest) {
         const daysOld = daysBetween(new Date(pullRequest.createdAt), new Date());
         return daysOld > limit;
     }
     return false;
-}
+};
 /**
  * Update the version for the project.
  * @param octokit
@@ -47561,7 +47561,7 @@ function isPullRequestTooOld(draftRelease, limit) {
  * @param version
  * @param sha
  */
-async function setReleaseBranchVersion(octokit, packageEcoSystem, project, version, sha) {
+const setReleaseBranchVersion = async (octokit, packageEcoSystem, project, version, sha) => {
     const branch = getReleaseBranchName(project);
     const { repository: { file: existingFile } } = await octokit.graphql(getFileContentQuery(), {
         owner: github.context.repo.owner,
@@ -47587,13 +47587,13 @@ async function setReleaseBranchVersion(octokit, packageEcoSystem, project, versi
         }
     });
     core.debug(`Updated File: ${JSON.stringify(createCommitOnBranch, null, 2)}`);
-}
+};
 /**
  * Rebase the next calculated version.
  * @param draftRelease
  * @param versionType
  */
-function getNextVersion(draftRelease, versionType) {
+const getNextVersion = (draftRelease, versionType) => {
     for (const tag of draftRelease.tags.tags) {
         const tagName = tag.name;
         const tagVersion = tagName.substring(tagName.indexOf('@v') + 2);
@@ -47616,13 +47616,13 @@ function getNextVersion(draftRelease, versionType) {
         }
     }
     return getDefaultNextVersion();
-}
+};
 /**
  * Find the details of the draft release.
  * @param octokit
  * @param project
  */
-async function findDraftRelease(octokit, project) {
+const findDraftRelease = async (octokit, project) => {
     const pullRequests = await octokit.graphql(findDraftReleaseQuery(), {
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
@@ -47632,14 +47632,14 @@ async function findDraftRelease(octokit, project) {
     });
     core.debug(`Pull Request: ${JSON.stringify(pullRequests, null, 2)}`);
     return pullRequests.repository;
-}
+};
 /**
  * Create a new branch for the release.
  * @param octokit
  * @param draftRelease
  * @param project
  */
-async function createReleaseBranch(octokit, draftRelease, project) {
+const createReleaseBranch = async (octokit, draftRelease, project) => {
     const releaseBranch = getReleaseBranchName(project);
     const branch = await octokit.graphql(createRefMutation(), {
         repositoryId: draftRelease.id,
@@ -47647,30 +47647,30 @@ async function createReleaseBranch(octokit, draftRelease, project) {
         oid: github.context.sha
     });
     core.debug(`Created Branch: ${JSON.stringify(branch, null, 2)}`);
-}
+};
 /**
  * Update the draft release branch by rebasing it.
  * @param octokit
  * @param draftRelease
  */
-async function updateReleaseBranch(octokit, draftRelease) {
+const updateReleaseBranch = async (octokit, draftRelease) => {
     const branch = await octokit.graphql(updatePullRequestBranchMutation(), {
         pullRequestId: draftRelease.pullRequests.pullRequests[0].id
     });
     core.debug(`Updated Branch: ${JSON.stringify(branch, null, 2)}`);
-}
+};
 /**
  * Recreate the release branch.
  * @param octokit
  * @param draftRelease
  */
-async function recreateReleaseBranch(octokit, draftRelease) {
+const recreateReleaseBranch = async (octokit, draftRelease) => {
     const branch = await octokit.graphql(updateRefMutation(), {
         refId: draftRelease.branches.branches[0].id,
         oid: github.context.sha
     });
     core.debug(`Recreated Branch: ${JSON.stringify(branch, null, 2)}`);
-}
+};
 /**
  * Create draft release pull request.
  * @param octokit
@@ -47679,7 +47679,7 @@ async function recreateReleaseBranch(octokit, draftRelease) {
  * @param branch
  * @param nextVersion
  */
-async function createPullRequest(octokit, draftRelease, project, branch, nextVersion) {
+const createPullRequest = async (octokit, draftRelease, project, branch, nextVersion) => {
     const releaseBranch = getReleaseBranchName(project);
     const pullRequest = await octokit.graphql(createPullRequestMutation(), {
         repositoryId: draftRelease.id,
@@ -47694,27 +47694,27 @@ async function createPullRequest(octokit, draftRelease, project, branch, nextVer
         labelIds: [draftRelease.releaseLabel.id, draftRelease.projectLabel.id]
     });
     core.debug(`Updated pull request labels: ${JSON.stringify(pullRequestLabels, null, 2)}`);
-}
+};
 /**
  * Add a comment to the pull request.
  * @param octokit
  * @param issueId
  * @param body
  */
-async function addComment(octokit, issueId, body) {
+const addComment = async (octokit, issueId, body) => {
     const response = await octokit.graphql(addCommentMutation(), {
         subjectId: issueId,
         body
     });
     core.debug(`Added comment: ${JSON.stringify(response, null, 2)}`);
-}
+};
 /**
  * Add a comment to the pull request if it doesn't already exist.
  * @param octokit
  * @param draftRelease
  * @param body
  */
-async function addCommentIfRequired(octokit, draftRelease, body) {
+const addCommentIfRequired = async (octokit, draftRelease, body) => {
     const pullRequest = getPullRequest(draftRelease);
     if (pullRequest) {
         const lastComment = getLastComment(draftRelease);
@@ -47722,20 +47722,20 @@ async function addCommentIfRequired(octokit, draftRelease, body) {
             await addComment(octokit, pullRequest.id, body);
         }
     }
-}
+};
 /**
  * Add a reaction to a comment.
  * @param octokit
  * @param commentId
  * @param reaction
  */
-async function addCommentReaction(octokit, commentId, reaction) {
+const addCommentReaction = async (octokit, commentId, reaction) => {
     const response = await octokit.graphql(addReactionMutation(), {
         subjectId: commentId,
         content: reaction
     });
     core.debug(`Added comment reaction: ${JSON.stringify(response, null, 2)}`);
-}
+};
 /**
  * Update the pull request title.
  * @param octokit
@@ -47743,31 +47743,31 @@ async function addCommentReaction(octokit, commentId, reaction) {
  * @param project
  * @param nextVersion
  */
-async function updatePullRequestTitleAndBody(octokit, draftRelease, project, nextVersion) {
+const updatePullRequestTitleAndBody = async (octokit, draftRelease, project, nextVersion) => {
     const pullRequestLabels = await octokit.graphql(updatePullRequestTitleAndBodyMutation(), {
         pullRequestId: draftRelease.pullRequests.pullRequests[0].id,
         title: getPullRequestTitle(project, nextVersion),
         body: getPullRequestBody(project, nextVersion, `${draftRelease.url}/releases`)
     });
     core.debug(`Updated pull request title: ${JSON.stringify(pullRequestLabels, null, 2)}`);
-}
+};
 /**
  * Reopen the pull request.
  * @param octokit
  * @param draftRelease
  */
-async function reopenPullRequest(octokit, draftRelease) {
+const reopenPullRequest = async (octokit, draftRelease) => {
     const pullRequestLabels = await octokit.graphql(reopenPullRequestMutation(), {
         pullRequestId: draftRelease.pullRequests.pullRequests[0].id
     });
     core.debug(`Reopened pull request: ${JSON.stringify(pullRequestLabels, null, 2)}`);
-}
+};
 /**
  * Find the last tag in the repository.
  * @param octokit
  * @param project
  */
-async function findLastTag(octokit, project) {
+const findLastTag = async (octokit, project) => {
     const tag = await octokit.graphql(findLatestTagQuery(), {
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
@@ -47775,14 +47775,14 @@ async function findLastTag(octokit, project) {
     });
     core.debug(`Found tag: ${JSON.stringify(tag, null, 2)}`);
     return tag.repository.tags.tags.length > 0 ? tag.repository.tags.tags[0].name : undefined;
-}
+};
 /**
  * Generate the release notes for the project.
  * @param octokit
  * @param project
  * @param version
  */
-async function generateGithubReleaseNotes(octokit, project, version) {
+const generateGithubReleaseNotes = async (octokit, project, version) => {
     const lastTag = await findLastTag(octokit, project);
     const releaseNotes = await octokit.rest.repos.generateReleaseNotes({
         owner: github.context.repo.owner,
@@ -47793,14 +47793,14 @@ async function generateGithubReleaseNotes(octokit, project, version) {
     });
     core.debug(`Generated release notes: ${JSON.stringify(releaseNotes, null, 2)}`);
     return releaseNotes.data.body;
-}
+};
 /**
  * Create a new release in GitHub.
  * @param octokit
  * @param project
  * @param version
  */
-async function createGitHubRelease(octokit, project, version) {
+const createGitHubRelease = async (octokit, project, version) => {
     const lastTag = await findLastTag(octokit, project);
     const releaseNotes = await generateGithubReleaseNotes(octokit, project, version);
     const release = await octokit.rest.repos.createRelease({
@@ -47814,7 +47814,7 @@ async function createGitHubRelease(octokit, project, version) {
     });
     core.debug(`Created release: ${JSON.stringify(release, null, 2)}`);
     return release.data;
-}
+};
 /**
  * Publish the draft release in GitHub.
  * @param octokit
@@ -47822,7 +47822,7 @@ async function createGitHubRelease(octokit, project, version) {
  * @param project
  * @param version
  */
-async function publishGitHubRelease(octokit, release_id, project, version) {
+const publishGitHubRelease = async (octokit, release_id, project, version) => {
     const releaseNotes = await generateGithubReleaseNotes(octokit, project, version);
     const updatedRelease = await octokit.rest.repos.updateRelease({
         owner: github.context.repo.owner,
@@ -47835,7 +47835,7 @@ async function publishGitHubRelease(octokit, release_id, project, version) {
     });
     core.debug(`Publish release: ${JSON.stringify(updatedRelease, null, 2)}`);
     return updatedRelease.data;
-}
+};
 /**
  * Update the GitHub release.
  * @param octokit
@@ -47843,7 +47843,7 @@ async function publishGitHubRelease(octokit, release_id, project, version) {
  * @param project
  * @param version
  */
-async function updateGitHubRelease(octokit, release_id, project, version) {
+const updateGitHubRelease = async (octokit, release_id, project, version) => {
     const releaseNotes = await generateGithubReleaseNotes(octokit, project, version);
     const updatedRelease = await octokit.rest.repos.updateRelease({
         owner: github.context.repo.owner,
@@ -47855,21 +47855,21 @@ async function updateGitHubRelease(octokit, release_id, project, version) {
     });
     core.debug(`Updated release: ${JSON.stringify(updatedRelease, null, 2)}`);
     return updatedRelease.data;
-}
+};
 /**
  * Find the draft release in GitHub.
  * @param octokit
  * @param project
  * @param version
  */
-async function findGitHubDraftRelease(octokit, project, version) {
+const findGitHubDraftRelease = async (octokit, project, version) => {
     const releases = await octokit.rest.repos.listReleases({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo
     });
     core.debug(`Releases: ${JSON.stringify(releases, null, 2)}`);
     return releases.data.find(release => `${project}@v${version}` === release.name && release.draft);
-}
+};
 
 ;// CONCATENATED MODULE: ./node_modules/js-yaml/dist/js-yaml.mjs
 
@@ -51732,7 +51732,7 @@ var jsYaml = {
  * Get the configuration file from the repository
  * @param octokit
  */
-async function getConfig(octokit) {
+const getConfig = async (octokit) => {
     const response = await octokit.rest.repos.getContent({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
@@ -51747,7 +51747,7 @@ async function getConfig(octokit) {
         }
     }
     return undefined;
-}
+};
 
 ;// CONCATENATED MODULE: ./src/main.ts
 
@@ -51770,7 +51770,7 @@ const BOT_NAME = 'krytenbot[bot]';
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
-async function run() {
+const run = async () => {
     try {
         core.startGroup('GitHub Context');
         core.info(JSON.stringify(github.context, null, 2));
@@ -51816,13 +51816,13 @@ async function run() {
         if (error instanceof Error)
             core.setFailed(error.message);
     }
-}
+};
 /**
  * Handles the pull request event.
  * @param config
  * @param octokit
  */
-async function pullRequestEvent(config, octokit) {
+const pullRequestEvent = async (config, octokit) => {
     const pullRequestPayload = github.context.payload;
     try {
         if (pullRequestPayload.pull_request.labels.some(label => label.name === 'release') && pullRequestPayload.pull_request.user.login === BOT_NAME) {
@@ -51848,13 +51848,13 @@ async function pullRequestEvent(config, octokit) {
         if (error instanceof Error)
             core.setFailed(error.message);
     }
-}
+};
 /**
  * Handles the push event.
  * @param config
  * @param octokit
  */
-async function pushEvent(config, octokit) {
+const pushEvent = async (config, octokit) => {
     const pushPayload = github.context.payload;
     const wasReleasePush = pushPayload.commits.some(commit => commit.author.name === BOT_NAME);
     if (!wasReleasePush) {
@@ -51924,13 +51924,13 @@ async function pushEvent(config, octokit) {
     else {
         core.info(`Ignoring push event as it included commits by ${BOT_NAME}. This was most likely a release push.`);
     }
-}
+};
 /**
  * Handles the issue comment event.
  * @param config
  * @param octokit
  */
-async function issueCommentEvent(config, octokit) {
+const issueCommentEvent = async (config, octokit) => {
     const comment = github.context.payload;
     const project = extractProjectNameFromPR(comment.issue.body);
     if (project) {
@@ -51950,7 +51950,7 @@ async function issueCommentEvent(config, octokit) {
     else {
         core.warning('No project for pull request found');
     }
-}
+};
 /**
  * Handles the issue comment event for setting the version.
  * @param config
@@ -51959,7 +51959,7 @@ async function issueCommentEvent(config, octokit) {
  * @param project
  * @param comment
  */
-async function issueCommentEventSetVersion(config, octokit, draftRelease, project, comment) {
+const issueCommentEventSetVersion = async (config, octokit, draftRelease, project, comment) => {
     const versionType = comment.comment.body.split(' ')[2];
     if (isValidSemverVersionType(versionType)) {
         core.info(`Calculating new version for '${project}'`);
@@ -51983,7 +51983,7 @@ async function issueCommentEventSetVersion(config, octokit, draftRelease, projec
     else {
         core.setFailed(`Invalid version type: ${versionType}`);
     }
-}
+};
 /**
  * Handles the issue comment event for rebasing the branch.
  * @param octokit
@@ -51991,7 +51991,7 @@ async function issueCommentEventSetVersion(config, octokit, draftRelease, projec
  * @param project
  * @param comment
  */
-async function issueCommentEventRebase(octokit, draftRelease, project, comment) {
+const issueCommentEventRebase = async (octokit, draftRelease, project, comment) => {
     core.info(`Updating release branch for '${project}'`);
     try {
         await addCommentReaction(octokit, String(comment.comment.node_id), 'THUMBS_UP');
@@ -52002,7 +52002,7 @@ async function issueCommentEventRebase(octokit, draftRelease, project, comment) 
         if (error instanceof Error)
             core.setFailed(error.message);
     }
-}
+};
 /**
  * Handles the issue comment event for recreating the branch.
  * @param config
@@ -52011,7 +52011,7 @@ async function issueCommentEventRebase(octokit, draftRelease, project, comment) 
  * @param project
  * @param comment
  */
-async function issueCommentEventRecreate(config, octokit, draftRelease, project, comment) {
+const issueCommentEventRecreate = async (config, octokit, draftRelease, project, comment) => {
     core.info(`Recreating release branch for '${project}'`);
     try {
         await addCommentReaction(octokit, String(comment.comment.node_id), 'THUMBS_UP');
@@ -52031,7 +52031,7 @@ async function issueCommentEventRecreate(config, octokit, draftRelease, project,
         if (error instanceof Error)
             core.setFailed(error.message);
     }
-}
+};
 
 ;// CONCATENATED MODULE: ./src/index.ts
 /**

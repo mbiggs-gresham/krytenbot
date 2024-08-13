@@ -20,7 +20,7 @@ export interface Config {
  * Get the configuration file from the repository
  * @param octokit
  */
-export async function getConfig(octokit: Octokit): Promise<Config | undefined> {
+export const getConfig = async (octokit: Octokit): Promise<Config | undefined> => {
   const response: GetContentResponse = await octokit.rest.repos.getContent({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,

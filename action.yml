@@ -7,9 +7,6 @@ branding:
   color: 'red'
 
 inputs:
-  token:
-    description: 'Your github token'
-    required: true
   app_id:
     description: 'Your krytenbot app id'
     required: true

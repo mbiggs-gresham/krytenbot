@@ -5,7 +5,7 @@ const semverVersionTypes = ['major', 'minor', 'patch']
  * @param fileContents
  * @param nextVersion
  */
-export function patchPackageJson(fileContents: string, nextVersion: string): string {
+export const patchPackageJson = (fileContents: string, nextVersion: string): string => {
   return fileContents.replace(/"version": "(.*)"/, `"version": "${nextVersion}"`)
 }
 
@@ -15,7 +15,7 @@ export function patchPackageJson(fileContents: string, nextVersion: string): str
  * @param fileContents
  * @param nextVersion
  */
-export function patchVersion(packageEcoSystem: string, fileContents: string, nextVersion: string): string {
+export const patchVersion = (packageEcoSystem: string, fileContents: string, nextVersion: string): string => {
   switch (packageEcoSystem) {
     case 'npm':
       return patchPackageJson(fileContents, nextVersion)
@@ -28,7 +28,7 @@ export function patchVersion(packageEcoSystem: string, fileContents: string, nex
  * This function will take a package ecosystem and return the path to the package file.
  * @param packageEcoSystem
  */
-export function getPackagePath(packageEcoSystem: string): string {
+export const getPackagePath = (packageEcoSystem: string): string => {
   switch (packageEcoSystem) {
     case 'npm':
       return 'package.json'
@@ -41,6 +41,6 @@ export function getPackagePath(packageEcoSystem: string): string {
  * This function will take a version number and return the next version number based on the version type.
  * @param version
  */
-export function isValidSemverVersionType(version: string): boolean {
+export const isValidSemverVersionType = (version: string): boolean => {
   return semverVersionTypes.includes(version)
 }

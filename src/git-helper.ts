@@ -13,7 +13,7 @@ interface GitResult {
 /**
  * Get the fetch URL for the repository.
  */
-function getFetchUrl(): string {
+const getFetchUrl = (): string => {
   const encodedOwner = encodeURIComponent(github.context.repo.owner)
   const encodedName = encodeURIComponent(github.context.repo.repo)
   return `https://github.com/${encodedOwner}/${encodedName}`
@@ -23,7 +23,7 @@ function getFetchUrl(): string {
  * Execute a Git command with the given arguments.
  * @param args
  */
-async function execGit(args: string[]): Promise<GitResult> {
+const execGit = async (args: string[]): Promise<GitResult> => {
   const stdout: string[] = []
   const stderr: string[] = []
 
@@ -48,7 +48,7 @@ async function execGit(args: string[]): Promise<GitResult> {
 /**
  * Display information about the Git installation.
  */
-export async function displayInfo(): Promise<void> {
+export const displayInfo = async (): Promise<void> => {
   const git = await io.which('git', true)
   const gitVersionOutput = await execGit(['--version'])
   const gitVersion = gitVersionOutput.stdout.match(/\d+\.\d+(\.\d+)?/)
@@ -63,7 +63,7 @@ export async function displayInfo(): Promise<void> {
  * Initialize and configure the repository.
  * @param token The security token to use for authentication.
  */
-export async function init(token: string): Promise<void> {
+export const init = async (token: string): Promise<void> => {
   const basicCredential = base64.encode(`x-access-token:${token}`)
 
   const gitInitOutput = await execGit(['init', '--initial-branch', 'main'])
@@ -78,7 +78,7 @@ export async function init(token: string): Promise<void> {
 /**
  * Clone the repository.
  */
-export async function clone(): Promise<GitResult> {
+export const clone = async (): Promise<GitResult> => {
   const branch = github.context.ref.substring('refs/heads/'.length)
   const ref = `refs/remotes/origin/${branch}`
 
@@ -98,7 +98,7 @@ export async function clone(): Promise<GitResult> {
  * Fetch the specified remote branch.
  * @param name
  */
-export async function fetchBranch(name: string): Promise<GitResult> {
+export const fetchBranch = async (name: string): Promise<GitResult> => {
   const output = await execGit(['fetch', '--no-tags', '--prune', '--depth', '1', 'origin', name])
   core.info(`Git Fetch: ${output.stdout}`)
   return output
@@ -107,7 +107,7 @@ export async function fetchBranch(name: string): Promise<GitResult> {
 /**
  * Fetch the remote repository without a shallow clone.
  */
-export async function fetchUnshallow(): Promise<GitResult> {
+export const fetchUnshallow = async (): Promise<GitResult> => {
   const output = await execGit(['fetch', '--no-tags', '--prune', '--unshallow'])
   core.info(`Git Fetch: ${output.stdout}`)
   return output
@@ -117,7 +117,7 @@ export async function fetchUnshallow(): Promise<GitResult> {
  * Create a new branch.
  * @param name
  */
-export async function createBranch(name: string): Promise<GitResult> {
+export const createBranch = async (name: string): Promise<GitResult> => {
   const output = await execGit(['checkout', '-b', name])
   core.info(`Git Branch: ${output.stdout}`)
   return output
@@ -127,7 +127,7 @@ export async function createBranch(name: string): Promise<GitResult> {
  * Switch to the specified branch.
  * @param name
  */
-export async function switchBranch(name: string): Promise<GitResult> {
+export const switchBranch = async (name: string): Promise<GitResult> => {
   const output = await execGit(['switch', name])
   core.info(`Git Switch: ${output.stdout}`)
   return output
@@ -138,7 +138,7 @@ export async function switchBranch(name: string): Promise<GitResult> {
  * @param name
  * @param force
  */
-export async function push(name: string, force: boolean = false): Promise<GitResult> {
+export const push = async (name: string, force: boolean = false): Promise<GitResult> => {
   const output = await execGit(force ? ['push', '-f', '-u', 'origin', name] : ['push', '-u', 'origin', name])
   core.info(`Git Push: ${output.stdout}`)
   return output
@@ -148,7 +148,7 @@ export async function push(name: string, force: boolean = false): Promise<GitRes
  * Rebase the release branch.
  * @param branch
  */
-export async function rebaseBranch(branch: string): Promise<GitResult> {
+export const rebaseBranch = async (branch: string): Promise<GitResult> => {
   const output = await execGit(['rebase', branch])
   core.info(`Git Rebase: ${output.stdout}`)
   return output

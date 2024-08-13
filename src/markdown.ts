@@ -1,23 +1,23 @@
-export function note(message: string): string {
+export const note = (message: string): string => {
   return `> [!NOTE]\n> ${message}`
 }
 
-export function tip(message: string): string {
+export const tip = (message: string): string => {
   return `> [!TIP]\n> ${message}`
 }
 
-export function important(message: string): string {
+export const important = (message: string): string => {
   return `> [!IMPORTANT]\n> ${message}`
 }
 
-export function warning(message: string): string {
+export const warning = (message: string): string => {
   return `> [!WARNING]\n> ${message}`
 }
 
-export function caution(message: string): string {
+export const caution = (message: string): string => {
   return `> [!CAUTION]\n> ${message}`
 }
 
-export function hidden(message: string): string {
+export const hidden = (message: string): string => {
   return `[//]: # (${message})`
 }

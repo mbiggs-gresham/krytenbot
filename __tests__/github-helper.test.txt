@@ -1,0 +1,106 @@
+import { it, describe, beforeEach, vi } from 'vitest'
+import { App, Octokit } from 'octokit'
+import fetchMock from 'fetch-mock'
+import * as github from '../src/github-helper'
+import { KrytenbotDraftRelease } from '../src/github-helper'
+
+const draftRelease: KrytenbotDraftRelease = {
+  id: 'R_kgDOMgBsmQ',
+  url: 'https://github.com/mbiggs-gresham/krytenbot-test',
+  tags: {
+    tags: [
+      {
+        id: 'REF_kwDOMgBsmbVyZWZzL3RhZ3MvY29yZUB2MS4wLjM',
+        name: 'test@v1.0.1'
+      }
+    ]
+  },
+  branches: {
+    branches: [
+      {
+        id: 'REF_kwDOMgBsmblyZWZzL2hlPPRzL2tyeXRlbmJvdC1jb3Jl',
+        name: 'krytenbot-test'
+      }
+    ]
+  },
+  releaseLabel: {
+    id: 'LA_kwDOMgBsmc8AAAABsu_aSw',
+    name: 'release'
+  },
+  projectLabel: {
+    id: 'LA_kwDOMgBsmc8AAAABsu_aUA',
+    name: 'core'
+  },
+  pullRequests: {
+    pullRequests: [
+      {
+        id: 'PR_kwDOMgBsmc54FRdg',
+        number: 28,
+        title: 'Release `test` v1.0.1',
+        body: '[//]: # (krytenbot-project:test)\n[//]: # (krytenbot-version:1.0.1)\n\n\nThis PR was created automatically by the Krytenbot to track the next release. \nThe next version for this release is v1.0.1.\n\nYou can find the release notes for this version [here](https://github.com/mbiggs-gresham/krytenbot-test/releases).\n\n---\n\n<details>\n<summary>Krytenbot commands and options</summary>\n<br />\n\nYou can trigger Krytenbot actions by commenting on this PR:\n- `@krytenbot rebase` will rebase this PR\n- `@krytenbot recreate` will recreate this PR, overwriting any edits that have been made to it\n- `@krytenbot setversion [major|minor|patch]` will set the version for this PR\n</details>\n  ',
+        createdAt: '2024-08-12T09:53:30Z',
+        lastEditedAt: '2024-08-12T09:53:30Z',
+        baseRefName: 'main',
+        baseRefOid: '40e93ef1c435e7eb172ec99c4695ae675d1b87c9',
+        headRefName: 'krytenbot-test',
+        headRefOid: '490d83e92d61f242bec322f448129a3c4bafa8b9',
+        author: {
+          login: 'krytenbot'
+        },
+        comments: {
+          comments: []
+        }
+      }
+    ]
+  }
+}
+
+describe('action', () => {
+  let mock: typeof fetchMock
+  let app: InstanceType<typeof App>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mock = fetchMock.sandbox()
+    app = new App({
+      appId: 'APP_ID',
+      privateKey: 'PRIVATE_KEY',
+      Octokit: Octokit.defaults({
+        request: {
+          fetch: mock
+        }
+      })
+    })
+  })
+
+  it('retrieves the inputs correctly', async () => {
+    const octokit: Octokit = await app.getInstallationOctokit(123)
+
+    mock
+      .postOnce(
+        'path:/app/installations/123/access_tokens',
+        {
+          token: 'secret123',
+          expires_at: '1970-01-01T01:00:00.000Z',
+          permissions: {
+            metadata: 'read'
+          },
+          repository_selection: 'all'
+        },
+        {}
+      )
+      .postOnce(
+        'path:/repos/octokit/octokit.js/issues',
+        { id: 1 },
+        {
+          body: {
+            title: 'Hello, world!'
+          }
+        }
+      )
+
+    await github.updateReleaseBranch(octokit, draftRelease)
+    // const octokit = github.getOctokit('token')
+    // expect(octokit).toBeDefined()
+  })
+})

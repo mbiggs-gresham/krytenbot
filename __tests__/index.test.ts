@@ -1,17 +1,15 @@
 /**
  * Unit tests for the action's entrypoint, src/index.ts
  */
-
+import { it, describe, expect, vi } from 'vitest'
 import * as main from '../src/main'
-
-// Mock the action's entrypoint
-const runMock = jest.spyOn(main, 'run').mockImplementation()
 
 describe('index', () => {
   it('calls run when imported', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('../src/index')
+    const runMock = vi.spyOn(main, 'run')
+    runMock.mockImplementation(async (): Promise<void> => {})
 
+    await import('../src/index')
     expect(runMock).toHaveBeenCalled()
   })
 })

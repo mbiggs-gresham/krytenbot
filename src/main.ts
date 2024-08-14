@@ -6,7 +6,7 @@ import * as githubapi from './github-helper'
 import * as versions from './version-helper'
 import * as config from './config-helper'
 import { Commands, KrytenbotDraftRelease, Version } from './github-helper'
-import { note, caution } from './markdown'
+import { note, caution } from './markdown-helper'
 import { Config, ConfigProject } from './config-helper'
 
 enum Events {

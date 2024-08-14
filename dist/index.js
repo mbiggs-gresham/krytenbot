@@ -47122,7 +47122,7 @@ const decode = (input) => {
     return Buffer.from(input, 'base64').toString('utf-8');
 };
 
-;// CONCATENATED MODULE: ./src/markdown.ts
+;// CONCATENATED MODULE: ./src/markdown-helper.ts
 const note = (message) => {
     return `> [!NOTE]\n> ${message}`;
 };
@@ -47138,7 +47138,7 @@ const warning = (message) => {
 const caution = (message) => {
     return `> [!CAUTION]\n> ${message}`;
 };
-const markdown_hidden = (message) => {
+const markdown_helper_hidden = (message) => {
     return `[//]: # (${message})`;
 };
 
@@ -47427,16 +47427,16 @@ const getDefaultNextVersion = () => {
  */
 const getPullRequestBody = (project, nextVersion, githubReleaseUrl, rebasing = false) => {
     const body = [];
-    body.push(markdown_hidden(`krytenbot-project:${project}`));
+    body.push(markdown_helper_hidden(`krytenbot-project:${project}`));
     body.push('\n');
-    body.push(markdown_hidden(`krytenbot-version:${nextVersion}`));
+    body.push(markdown_helper_hidden(`krytenbot-version:${nextVersion}`));
     body.push('\n\n');
     if (rebasing) {
-        body.push(markdown_hidden('krytenbot-start'));
+        body.push(markdown_helper_hidden('krytenbot-start'));
         body.push('\n\n');
         body.push(important('Krytenbot is rebasing this PR'));
         body.push('\n\n');
-        body.push(markdown_hidden('krytenbot-end'));
+        body.push(markdown_helper_hidden('krytenbot-end'));
         body.push('\n');
     }
     body.push(`

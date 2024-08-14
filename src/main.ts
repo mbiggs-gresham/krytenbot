@@ -2,7 +2,6 @@ import { App, Octokit } from 'octokit'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { IssueCommentEvent, PullRequestEvent, PushEvent } from '@octokit/webhooks-types'
-import nock from 'nock'
 import * as githubapi from './github-helper'
 import * as versions from './version-helper'
 import * as config from './config-helper'
@@ -24,8 +23,6 @@ const BOT_NAME = 'krytenbot[bot]'
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 export const run = async (): Promise<void> => {
-  nock.recorder.rec()
-
   try {
     core.startGroup('GitHub Context')
     core.info(JSON.stringify(github.context, null, 2))
@@ -75,8 +72,6 @@ export const run = async (): Promise<void> => {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
   }
-
-  nock.restore()
 }
 
 /**

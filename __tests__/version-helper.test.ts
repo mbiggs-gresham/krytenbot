@@ -20,6 +20,10 @@ describe('version-helper', () => {
     expect(getPackagePath('npm')).toBe('package.json')
   })
 
+  it('throws an error for an unsupported package ecosystem', () => {
+    expect(() => getPackagePath('foo')).toThrowError('Unsupported package ecosystem: foo')
+  })
+
   it('patches package.json', () => {
     const fileContents = `{
       "name": "test",
@@ -44,5 +48,14 @@ describe('version-helper', () => {
       "version": "${nextVersion}"
     }`
     expect(patchVersion('npm', fileContents, nextVersion)).toBe(expected)
+  })
+
+  it('throws an error for an unsupported package ecosystem', () => {
+    const fileContents = `{
+      "name": "test",
+      "version": "1.0.0"
+    }`
+    const nextVersion = '1.0.1'
+    expect(() => patchVersion('foo', fileContents, nextVersion)).toThrowError('Unsupported package ecosystem: foo')
   })
 })

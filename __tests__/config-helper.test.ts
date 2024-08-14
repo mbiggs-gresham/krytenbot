@@ -16,20 +16,6 @@ const configuration: Config = {
 const content = Buffer.from(yaml.dump(configuration), 'utf-8').toString('base64')
 
 describe('config-helper', () => {
-  const octokit = {
-    rest: {
-      repos: {
-        getContent: async () => ({
-          data: {
-            type: 'file',
-            size: 100,
-            content
-          }
-        })
-      }
-    }
-  }
-
   vi.mock('@actions/github', () => ({
     context: {
       repo: {
@@ -39,8 +25,41 @@ describe('config-helper', () => {
     }
   }))
 
-  it('retrieves the config correctly', async () => {
-    const config = await getConfig(octokit as Octokit)
+  it('returns valid config correctly', async () => {
+    const octokit = {
+      rest: {
+        repos: {
+          getContent: async () => ({
+            data: {
+              type: 'file',
+              size: 100,
+              content
+            }
+          })
+        }
+      }
+    } as Octokit
+
+    const config = await getConfig(octokit)
     expect(config).toEqual(configuration)
+  })
+
+  it('doesnt return invalid config correctly', async () => {
+    const octokit = {
+      rest: {
+        repos: {
+          getContent: async () => ({
+            data: {
+              type: 'file',
+              size: 100,
+              content: ''
+            }
+          })
+        }
+      }
+    } as Octokit
+
+    const config = await getConfig(octokit)
+    expect(config).toEqual(undefined)
   })
 })

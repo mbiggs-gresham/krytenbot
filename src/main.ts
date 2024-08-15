@@ -2,12 +2,14 @@ import { App, Octokit } from 'octokit'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { IssueCommentEvent, PullRequestEvent, PushEvent } from '@octokit/webhooks-types'
+import fetch from 'node-fetch'
 import * as githubapi from './github-helper'
 import * as versions from './version-helper'
 import * as config from './config-helper'
 import { Commands, KrytenbotDraftRelease, Version } from './github-helper'
 import { note, caution } from './markdown-helper'
 import { Config, ConfigProject } from './config-helper'
+import { Fetch } from '@octokit/types'
 
 enum Events {
   Push = 'push',
@@ -17,6 +19,11 @@ enum Events {
 
 const DAYS_OLD = 30
 const BOT_NAME = 'krytenbot[bot]'
+
+/**
+ * The fetch implementation to use.
+ */
+export const getFetch = (): Fetch => fetch
 
 /**
  * The main function for the action.
@@ -31,7 +38,18 @@ export const run = async (): Promise<void> => {
     const appId = core.getInput('app_id')
     const privateKey = core.getInput('private_key')
 
-    const app: App = new App({ appId, privateKey })
+    const app: App = new App({
+      appId,
+      privateKey,
+      octokit: Octokit.defaults({
+        request: {
+          fetch: getFetch()
+        }
+      })
+    })
+    core.endGroup()
+
+    core.info('Getting installation ID')
     const { data: installation } = await app.octokit.rest.apps.getRepoInstallation({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo
@@ -69,9 +87,11 @@ export const run = async (): Promise<void> => {
       core.setFailed("No configuration found at '.github/krytenbot.yml'")
     }
   } catch (error) {
+    console.log('Error:', error)
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
   }
+  console.log('Finished.')
 }
 
 /**
@@ -118,6 +138,7 @@ const pushEvent = async (config: Config, octokit: Octokit): Promise<void> => {
     const files = await githubapi.listPushCommitFiles(octokit, pushPayload)
     files.forEach(file => core.info(file))
     core.endGroup()
+    console.log(files)
 
     core.startGroup('Projects of Relevance')
     const projectsOfRelevance = githubapi.listProjectsOfRelevance(config.projects, files)

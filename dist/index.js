@@ -54738,20 +54738,7 @@ const markdown_helper_hidden = (message) => {
     return `[//]: # (${message})`;
 };
 
-;// CONCATENATED MODULE: ./src/github-helper.ts
-
-
-
-
-
-
-
-var Commands;
-(function (Commands) {
-    Commands["Rebase"] = "@krytenbot rebase";
-    Commands["Recreate"] = "@krytenbot recreate";
-    Commands["SetVersion"] = "@krytenbot setversion";
-})(Commands || (Commands = {}));
+;// CONCATENATED MODULE: ./src/github-helper-queries.ts
 const createRefMutation = () => {
     return `
     mutation CreateRef($repositoryId: ID!, $name: String!, $oid: GitObjectID!) {
@@ -54883,7 +54870,7 @@ const getFileContentQuery = () => {
         }
     }`;
 };
-// const findCommitQuery = (): string => {
+// export const findCommitQuery = (): string => {
 //   return `
 //     query FindCommit($owner: String!, $repo: String!, $oid: GitObjectID!) {
 //         repository(owner: $owner, name: $repo) {
@@ -54932,7 +54919,7 @@ const findLatestTagQuery = () => {
 };
 const findDraftReleaseQuery = () => {
     return `
-    query FindDraftRelease ($owner: String!, $repo: String!, $project: String!, $branch: String!, $labels: [String!]){
+    query FindDraftRelease ($owner: String!, $repo: String!, $project: String!, $branch: String!, $labels: [String!]) {
         repository(owner: $owner, name: $repo) {
               id
               url
@@ -54985,6 +54972,22 @@ const findDraftReleaseQuery = () => {
           }
     }`;
 };
+
+;// CONCATENATED MODULE: ./src/github-helper.ts
+
+
+
+
+
+
+
+
+var Commands;
+(function (Commands) {
+    Commands["Rebase"] = "@krytenbot rebase";
+    Commands["Recreate"] = "@krytenbot recreate";
+    Commands["SetVersion"] = "@krytenbot setversion";
+})(Commands || (Commands = {}));
 const extractProjectNameFromPR = (text) => {
     const match = text.match(/\[\/\/]:\s#\s\(krytenbot-project:(\w+)\)/);
     return match ? match[1] : null;
@@ -55219,15 +55222,15 @@ const getNextVersion = (draftRelease, versionType) => {
  * @param project
  */
 const findDraftRelease = async (octokit, project) => {
-    const pullRequests = await octokit.graphql(findDraftReleaseQuery(), {
+    const draftRelease = await octokit.graphql(findDraftReleaseQuery(), {
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
         project,
         branch: getReleaseBranchName(project),
         labels: ['release', project]
     });
-    core.debug(`Pull Request: ${JSON.stringify(pullRequests, null, 2)}`);
-    return pullRequests.repository;
+    core.debug(`Pull Request: ${JSON.stringify(draftRelease, null, 2)}`);
+    return draftRelease.repository;
 };
 /**
  * Create a new branch for the release.
@@ -59475,7 +59478,6 @@ const pushEvent = async (config, octokit) => {
         const files = await listPushCommitFiles(octokit, pushPayload);
         files.forEach(file => core.info(file));
         core.endGroup();
-        console.log(files);
         core.startGroup('Projects of Relevance');
         const projectsOfRelevance = listProjectsOfRelevance(config.projects, files);
         projectsOfRelevance.forEach(projectOfRelevance => core.info(projectOfRelevance.name));

@@ -10,6 +10,21 @@ import { hidden, important } from './markdown-helper'
 import { GraphQlQueryResponseData } from '@octokit/graphql'
 import { Endpoints } from '@octokit/types'
 import { ConfigProject } from './config-helper'
+import {
+  addCommentMutation,
+  addReactionMutation,
+  createCommitOnBranchMutation,
+  createPullRequestMutation,
+  createRefMutation,
+  findDraftReleaseQuery,
+  findLatestTagQuery,
+  getFileContentQuery,
+  reopenPullRequestMutation,
+  updatePullRequestBranchMutation,
+  updatePullRequestLabelsMutation,
+  updatePullRequestTitleAndBodyMutation,
+  updateRefMutation
+} from './github-helper-queries'
 
 type CreateReleaseResponse = Endpoints['POST /repos/{owner}/{repo}/releases']['response']
 type UpdateReleaseResponse = Endpoints['PATCH /repos/{owner}/{repo}/releases/{release_id}']['response']
@@ -90,254 +105,6 @@ export enum Commands {
   Rebase = '@krytenbot rebase',
   Recreate = '@krytenbot recreate',
   SetVersion = '@krytenbot setversion'
-}
-
-const createRefMutation = (): string => {
-  return `
-    mutation CreateRef($repositoryId: ID!, $name: String!, $oid: GitObjectID!) {
-        createRef(input:{ clientMutationId: "krytenbot", repositoryId: $repositoryId, name: $name, oid: $oid }) {
-            ref {
-                name
-                target {
-                    oid
-                }
-            }
-        }
-    }`
-}
-
-const updateRefMutation = (): string => {
-  return `
-    mutation UpdateRef($refId: ID!, $oid: GitObjectID!) {
-        updateRef(input:{ clientMutationId: "krytenbot", refId: $refId, oid: $oid, force: true }) {
-            ref {
-                name
-                target {
-                    oid
-                }
-            }
-        }
-    }`
-}
-
-const createCommitOnBranchMutation = (): string => {
-  return `
-    mutation CreateCommitOnBranch($branch: CommittableBranch!, $message: CommitMessage!, $expectedHeadOid: GitObjectID!, $fileChanges: FileChanges) {
-        createCommitOnBranch(input:{ clientMutationId: "krytenbot", branch: $branch, message: $message, expectedHeadOid: $expectedHeadOid, fileChanges: $fileChanges }) {
-            commit {
-                oid
-            }
-        }
-    }`
-}
-
-const createPullRequestMutation = (): string => {
-  return `
-    mutation CreatePullRequest($repositoryId: ID!, $baseRefName: String!, $headRefName: String!, $title: String!, $body: String!) {
-        createPullRequest(input:{ clientMutationId: "krytenbot", repositoryId: $repositoryId, baseRefName: $baseRefName, headRefName: $headRefName, title: $title, body: $body, draft: true }) {
-            pullRequest {
-                id
-            }
-        }
-    }`
-}
-
-const updatePullRequestLabelsMutation = (): string => {
-  return `
-    mutation UpdatePullRequestLabels($pullRequestId: ID!, $labelIds: [ID!]) {
-        updatePullRequest(input:{ clientMutationId: "krytenbot", pullRequestId: $pullRequestId, labelIds: $labelIds }) {
-            pullRequest {
-                id
-            }
-        }
-    }`
-}
-
-const updatePullRequestTitleAndBodyMutation = (): string => {
-  return `
-    mutation UpdatePullRequestLabels($pullRequestId: ID!, $title: String, $body: String) {
-        updatePullRequest(input:{ clientMutationId: "krytenbot", pullRequestId: $pullRequestId, title: $title, body: $body }) {
-            pullRequest {
-                id
-            }
-        }
-    }`
-}
-
-const updatePullRequestBranchMutation = (): string => {
-  return `
-    mutation UpdatePullRequestBranch($pullRequestId: ID!) {
-        updatePullRequestBranch(input:{ clientMutationId: "krytenbot", pullRequestId: $pullRequestId, updateMethod: REBASE }) {
-            pullRequest {
-                id
-            }
-        }
-    }`
-}
-
-const reopenPullRequestMutation = (): string => {
-  return `
-    mutation ReopenPullRequest($pullRequestId: ID!) {
-        reopenPullRequest(input:{ clientMutationId: "krytenbot", pullRequestId: $pullRequestId }) {
-            pullRequest {
-                id
-            }
-        }
-    }`
-}
-
-const addReactionMutation = (): string => {
-  return `
-    mutation AddReaction($subjectId: ID!, $content: ReactionContent!) {
-        addReaction(input:{ clientMutationId: "krytenbot", subjectId: $subjectId, content: $content }) {
-            reaction {
-                content
-            }
-            subject {
-                id
-            }
-        }
-    }`
-}
-
-const addCommentMutation = (): string => {
-  return `
-    mutation AddPullRequestComment($subjectId: ID!, $body: String!) {
-        addComment(input:{ clientMutationId: "krytenbot", subjectId: $subjectId, body: $body }) {            
-            subject {
-                id
-            }
-        }
-    }`
-}
-
-// const findRefQuery = (): string => {
-//   return `
-//     query FindRef($owner: String!, $repo: String!, $ref: String!) {
-//         repository(owner: $owner, name: $repo) {
-//             ref(qualifiedName: $ref) {
-//                 name
-//             }
-//         }
-//     }`
-// }
-
-const getFileContentQuery = (): string => {
-  return `
-    query GetFileContent($owner: String!, $repo: String!, $ref: String!) {
-        repository(owner: $owner, name: $repo) {
-              file: object(expression: $ref) {
-                  ... on Blob {
-                      content: text
-                  }
-              }
-        }
-    }`
-}
-
-// const findCommitQuery = (): string => {
-//   return `
-//     query FindCommit($owner: String!, $repo: String!, $oid: GitObjectID!) {
-//         repository(owner: $owner, name: $repo) {
-//             object(oid: $oid) {
-//                 ... on Commit {
-//                     oid
-//                     message
-//                     changedFilesIfAvailable
-//                     tree {
-//                        entries {
-//                           name
-//                           path
-//                        }
-//                     }
-//                     history(first: 1) {
-//                         nodes {
-//                             id
-//                             oid
-//                             message
-//                             changedFiles
-//                             tree {
-//                               entries {
-//                                 name
-//                                 path
-//                               }
-//                             }
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-//     }`
-// }
-
-const findLatestTagQuery = (): string => {
-  return `
-    query FindLatestTag($owner: String!, $repo: String!, $project: String!) {
-        repository(owner: $owner, name: $repo) {
-            tags: refs(last: 1, refPrefix: "refs/tags/", query: $project) {
-                tags: nodes {
-                    id
-                    name
-                }
-            }
-        }
-    }`
-}
-
-const findDraftReleaseQuery = (): string => {
-  return `
-    query FindDraftRelease ($owner: String!, $repo: String!, $project: String!, $branch: String!, $labels: [String!]){
-        repository(owner: $owner, name: $repo) {
-              id
-              url
-              tags: refs(last: 1, refPrefix: "refs/tags/", query: $project) {
-                  tags: nodes {
-                      id
-                      name
-                  }
-              }
-              branches: refs(last: 1, refPrefix: "refs/heads/", query: $branch) {
-                  branches: nodes {
-                      id
-                      name
-                  }
-              }
-              releaseLabel: label(name: "release") {
-                  id
-                  name
-              }
-              projectLabel: label(name: $project) {
-                  id
-                  name
-              }
-              pullRequests(last: 1, headRefName: $branch, labels: $labels, states: OPEN) {
-                  pullRequests: nodes {
-                      id
-                      number
-                      title
-                      body
-                      createdAt
-                      lastEditedAt
-                      baseRefName
-                      baseRefOid
-                      headRefName
-                      headRefOid
-                      author {
-                          login
-                      }
-                      comments(last: 10) {
-                          comments: nodes {
-                              id
-                              author {
-                                  login
-                              }
-                              body
-                          }
-                      }
-                  }
-              }
-          }
-    }`
 }
 
 export const extractProjectNameFromPR = (text: string): string | null => {
@@ -603,15 +370,15 @@ export const getNextVersion = (draftRelease: KrytenbotDraftRelease, versionType:
  * @param project
  */
 export const findDraftRelease = async (octokit: Octokit, project: string): Promise<KrytenbotDraftRelease> => {
-  const pullRequests: GraphQlQueryResponseData = await octokit.graphql(findDraftReleaseQuery(), {
+  const draftRelease: GraphQlQueryResponseData = await octokit.graphql(findDraftReleaseQuery(), {
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     project,
     branch: getReleaseBranchName(project),
     labels: ['release', project]
   })
-  core.debug(`Pull Request: ${JSON.stringify(pullRequests, null, 2)}`)
-  return pullRequests.repository
+  core.debug(`Pull Request: ${JSON.stringify(draftRelease, null, 2)}`)
+  return draftRelease.repository
 }
 
 /**

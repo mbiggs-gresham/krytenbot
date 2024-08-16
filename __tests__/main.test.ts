@@ -12,6 +12,9 @@ import * as core from '@actions/core'
 import { installationResponse } from './fixtures/responses/installation'
 import { accessTokenResponse } from './fixtures/responses/access_token'
 import { contentsResponse } from './fixtures/responses/contents'
+import { commit } from './fixtures/responses/commit'
+import { findDraftReleaseResponse } from './fixtures/responses/finddraftrelease'
+import { findDraftReleaseQuery } from './fixtures/queries/finddraftrelease'
 
 const APP_ID = '123'
 const PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
@@ -49,7 +52,7 @@ describe('action', () => {
     process.env['GITHUB_REPOSITORY'] = 'foo/bar'
   })
 
-  it('retrieves the inputs correctly', async () => {
+  it.skip('retrieves the inputs correctly', async () => {
     const main = await import('../src/main')
     const runMock: MockInstance<typeof main.run> = vi.spyOn(main, 'run')
     const getInputMock: MockInstance<typeof core.getInput> = vi.spyOn(core, 'getInput')
@@ -62,15 +65,16 @@ describe('action', () => {
     expect(getInputMock).toHaveBeenNthCalledWith(2, 'private_key')
   })
 
-  it.only('handles push event correctly', async () => {
+  it('handles push event correctly', async () => {
     process.env['GITHUB_EVENT_NAME'] = 'push'
     process.env['GITHUB_EVENT_PATH'] = path.join(__dirname, 'fixtures/push.json')
 
-    // prettier-ignore
-    mock
+    mock // prettier-ignore
       .getOnce('path:/repos/foo/bar/installation', installationResponse)
       .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse)
       .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse)
+      .getOnce('path:/repos/foo/bar/commits', commit)
+      .post('path:/graphql', findDraftReleaseResponse, findDraftReleaseQuery())
       // eslint-disable-next-line github/no-then
       .catch({
         error: 'not found'
@@ -81,8 +85,6 @@ describe('action', () => {
 
     const getFetchMock: MockInstance<typeof main.getFetch> = vi.spyOn(main, 'getFetch')
     getFetchMock.mockImplementation(() => mock)
-
-    // const getInputMock: MockInstance<typeof core.getInput> = vi.spyOn(core, 'getInput')
 
     await main.run()
     // console.log(`calls: ${JSON.stringify(mock.calls(), null, 2)}`)

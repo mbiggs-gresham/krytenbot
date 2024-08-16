@@ -138,7 +138,6 @@ const pushEvent = async (config: Config, octokit: Octokit): Promise<void> => {
     const files = await githubapi.listPushCommitFiles(octokit, pushPayload)
     files.forEach(file => core.info(file))
     core.endGroup()
-    console.log(files)
 
     core.startGroup('Projects of Relevance')
     const projectsOfRelevance = githubapi.listProjectsOfRelevance(config.projects, files)

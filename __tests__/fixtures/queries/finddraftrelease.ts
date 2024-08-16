@@ -2,5 +2,6 @@ import { findDraftReleaseQuery as query } from '../../../src/github-helper-queri
 
 export const findDraftReleaseQuery = (): object => ({
   body: { query: query() },
-  matchPartialBody: true
+  matchPartialBody: true,
+  overwriteRoutes: false
 })

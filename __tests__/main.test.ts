@@ -12,9 +12,12 @@ import * as core from '@actions/core'
 import { installationResponse } from './fixtures/responses/installation'
 import { accessTokenResponse } from './fixtures/responses/access_token'
 import { contentsResponse } from './fixtures/responses/contents'
-import { commit } from './fixtures/responses/commit'
+import { commitResponse } from './fixtures/responses/commit'
 import { findDraftReleaseResponse } from './fixtures/responses/finddraftrelease'
 import { findDraftReleaseQuery } from './fixtures/queries/finddraftrelease'
+import { findLatestTagQuery } from './fixtures/queries/findlatesttag'
+import { releasesResponse } from './fixtures/responses/releases'
+import { findLatestTagResponse } from './fixtures/responses/findlatesttag'
 
 const APP_ID = '123'
 const PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
@@ -57,6 +60,11 @@ describe('action', () => {
     const runMock: MockInstance<typeof main.run> = vi.spyOn(main, 'run')
     const getInputMock: MockInstance<typeof core.getInput> = vi.spyOn(core, 'getInput')
 
+    mock // prettier-ignore
+      .getOnce('path:/repos/foo/bar/installation', installationResponse)
+      .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse)
+      .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse)
+
     await main.run()
     expect(runMock).toHaveReturned()
 
@@ -73,8 +81,10 @@ describe('action', () => {
       .getOnce('path:/repos/foo/bar/installation', installationResponse)
       .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse)
       .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse)
-      .getOnce('path:/repos/foo/bar/commits', commit)
+      .getOnce('path:/repos/foo/bar/commits', commitResponse)
       .post('path:/graphql', findDraftReleaseResponse, findDraftReleaseQuery())
+      .getOnce('path:/repos/foo/bar/releases', releasesResponse)
+      .post('path:/graphql', findLatestTagResponse, findLatestTagQuery())
       // eslint-disable-next-line github/no-then
       .catch({
         error: 'not found'
@@ -82,7 +92,7 @@ describe('action', () => {
 
     const main = await import('../src/main')
     const runMock: MockInstance<typeof main.run> = vi.spyOn(main, 'run')
-
+    const setFailedMock: MockInstance<typeof core.setFailed> = vi.spyOn(core, 'setFailed')
     const getFetchMock: MockInstance<typeof main.getFetch> = vi.spyOn(main, 'getFetch')
     getFetchMock.mockImplementation(() => mock)
 
@@ -90,9 +100,6 @@ describe('action', () => {
     // console.log(`calls: ${JSON.stringify(mock.calls(), null, 2)}`)
     expect(runMock).toHaveReturned()
 
-    // expect(getInputMock).toHaveBeenCalledTimes(2)
-    // expect(getInputMock).toHaveBeenNthCalledWith(1, 'app_id')
-    // expect(getInputMock).toHaveBeenNthCalledWith(2, 'private_key')
-    // expect(getFetchMock).toHaveBeenCalled()
+    expect(setFailedMock).not.toHaveBeenCalled()
   })
 })

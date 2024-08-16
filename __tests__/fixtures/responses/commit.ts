@@ -1,4 +1,4 @@
-export const commit = (): object => ({
+export const commitResponse = (): object => ({
   files: [
     {
       filename: 'test/package.json'

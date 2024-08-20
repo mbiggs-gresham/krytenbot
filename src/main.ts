@@ -56,7 +56,6 @@ export const run = async (): Promise<void> => {
     })
 
     const octokit: Octokit = await app.getInstallationOctokit(installation.id)
-
     const configuration = await config.getConfig(octokit)
     core.startGroup('Configuration')
     core.info(JSON.stringify(configuration, null, 2))

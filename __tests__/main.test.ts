@@ -18,6 +18,10 @@ import { findDraftReleaseQuery } from './fixtures/queries/finddraftrelease'
 import { findLatestTagQuery } from './fixtures/queries/findlatesttag'
 import { releasesResponse } from './fixtures/responses/releases'
 import { findLatestTagResponse } from './fixtures/responses/findlatesttag'
+import { generateNotesResponse } from './fixtures/responses/generate-notes'
+import { releaseResponse } from './fixtures/responses/release'
+import { updatePullRequestBranchMutation } from './fixtures/mutations/updatepullrequestbranch'
+import { updatePullRequestBranchResponse } from './fixtures/responses/updatepullrequestbranch'
 
 const APP_ID = '123'
 const PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
@@ -85,6 +89,9 @@ describe('action', () => {
       .post('path:/graphql', findDraftReleaseResponse, findDraftReleaseQuery())
       .getOnce('path:/repos/foo/bar/releases', releasesResponse)
       .post('path:/graphql', findLatestTagResponse, findLatestTagQuery())
+      .postOnce('path:/repos/foo/bar/releases/generate-notes', generateNotesResponse)
+      .post('path:/repos/foo/bar/releases', releaseResponse)
+      .post('path:/graphql', updatePullRequestBranchResponse, updatePullRequestBranchMutation())
       // eslint-disable-next-line github/no-then
       .catch({
         error: 'not found'

@@ -90,17 +90,22 @@ describe('action', () => {
 
     // prettier-ignore
     fetch
-      .getOnce('path:/repos/foo/bar/installation', installationResponse)
-      .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse)
-      .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse)
+      .getOnce('path:/repos/foo/bar/installation', installationResponse, { name: 'installation' })
+      .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse, { name: 'accesstokens' })
+      .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse, { name: 'config' })
 
     await main.run()
     expect(runMock).toHaveReturned()
+    expect(setFailedMock).not.toHaveBeenCalled()
 
     expect(getInputMock).toHaveBeenCalledTimes(2)
     expect(getInputMock).toHaveBeenNthCalledWith(1, 'app_id')
     expect(getInputMock).toHaveBeenNthCalledWith(2, 'private_key')
-    expect(setFailedMock).not.toHaveBeenCalled()
+
+    expect(fetch.calls()).to.have.length(3)
+    expect(fetch.called('installation')).to.be.true
+    expect(fetch.called('accesstokens')).to.be.true
+    expect(fetch.called('config')).to.be.true
   })
 
   it('handles push event correctly', async () => {
@@ -144,24 +149,34 @@ describe('action', () => {
 
     // prettier-ignore
     fetch
-      .getOnce('path:/repos/foo/bar/installation', installationResponse)
-      .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse)
-      .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse)
-      .getOnce('path:/repos/foo/bar/commits', commitResponse)
-      .post('path:/graphql', findDraftReleaseResponse, findDraftReleaseQuery())
-      .getOnce('path:/repos/foo/bar/releases', releasesResponse)
-      .post('path:/graphql', findLatestTagResponse, findLatestTagQuery())
-      .postOnce('path:/repos/foo/bar/releases/generate-notes', generateNotesResponse)
-      .post('path:/repos/foo/bar/releases', releaseResponse)
-      .post('path:/graphql', updatePullRequestBranchResponse, updatePullRequestBranchMutation())
+      .getOnce('path:/repos/foo/bar/installation', installationResponse, { name: 'installation' })
+      .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse, { name: 'accesstokens' })
+      .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse, { name: 'config' })
+      .getOnce('path:/repos/foo/bar/commits', commitResponse, { name:'commits' })
+      .postOnce('path:/graphql', findDraftReleaseResponse, findDraftReleaseQuery({ name: 'finddraftrelease' }))
+      .getOnce('path:/repos/foo/bar/releases', releasesResponse, { name: 'listreleases' })
+      .post('path:/graphql', findLatestTagResponse, findLatestTagQuery({ name: 'findlatesttag', repeat: 2 }))
+      .postOnce('path:/repos/foo/bar/releases/generate-notes', generateNotesResponse, { name: 'generatenotes' })
+      .postOnce('path:/repos/foo/bar/releases', releaseResponse, { name: 'createrelase' })
+      .postOnce('path:/graphql', updatePullRequestBranchResponse, updatePullRequestBranchMutation({ name: 'updatepullrequestbranch' }))
 
     const main = await import('../src/main')
     const runMock: MockInstance<typeof main.run> = vi.spyOn(main, 'run')
 
     await main.run()
     expect(runMock).toHaveReturned()
-
-    // console.log(`calls: ${JSON.stringify(fetch.calls(), null, 2)}`)
     expect(setFailedMock).not.toHaveBeenCalled()
+
+    expect(fetch.calls()).to.have.length(11)
+    expect(fetch.called('installation')).to.be.true
+    expect(fetch.called('accesstokens')).to.be.true
+    expect(fetch.called('config')).to.be.true
+    expect(fetch.called('commits')).to.be.true
+    expect(fetch.called('finddraftrelease')).to.be.true
+    expect(fetch.called('listreleases')).to.be.true
+    expect(fetch.called('findlatesttag')).to.be.true
+    expect(fetch.called('generatenotes')).to.be.true
+    expect(fetch.called('createrelase')).to.be.true
+    expect(fetch.called('updatepullrequestbranch')).to.be.true
   })
 })

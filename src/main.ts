@@ -9,7 +9,6 @@ import * as config from './config-helper'
 import { Commands, KrytenbotDraftRelease, Version } from './github-helper'
 import { note, caution } from './markdown-helper'
 import { Config, ConfigProject } from './config-helper'
-import { Fetch } from '@octokit/types'
 
 enum Events {
   Push = 'push',
@@ -19,11 +18,6 @@ enum Events {
 
 const DAYS_OLD = 30
 const BOT_NAME = 'krytenbot[bot]'
-
-/**
- * The fetch implementation to use.
- */
-export const getFetch = (): Fetch => fetch
 
 /**
  * The main function for the action.
@@ -41,9 +35,9 @@ export const run = async (): Promise<void> => {
     const app: App = new App({
       appId,
       privateKey,
-      octokit: Octokit.defaults({
+      Octokit: Octokit.defaults({
         request: {
-          fetch: getFetch()
+          fetch
         }
       })
     })

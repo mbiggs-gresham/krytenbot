@@ -59367,10 +59367,6 @@ var Events;
 const DAYS_OLD = 30;
 const BOT_NAME = 'krytenbot[bot]';
 /**
- * The fetch implementation to use.
- */
-const getFetch = () => fetch;
-/**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
@@ -59384,9 +59380,9 @@ const run = async () => {
         const app = new dist_bundle_App({
             appId,
             privateKey,
-            octokit: dist_bundle_Octokit.defaults({
+            Octokit: dist_bundle_Octokit.defaults({
                 request: {
-                    fetch: getFetch()
+                    fetch: fetch
                 }
             })
         });

@@ -5,9 +5,8 @@
  * Specifically, the inputs listed in `action.yml` should be set as environment
  * variables following the pattern `INPUT_<INPUT_NAME>`.
  */
-import { it, describe, vi, expect, MockInstance, beforeEach } from 'vitest'
-import path from 'path'
-import mock from 'fetch-mock'
+import { it, describe, vi, expect, MockInstance, afterEach } from 'vitest'
+import fetchMock from 'fetch-mock'
 import * as core from '@actions/core'
 import { installationResponse } from './fixtures/responses/installation'
 import { accessTokenResponse } from './fixtures/responses/access_token'
@@ -52,19 +51,47 @@ ZcJjRIt8w8g/s4X6MhKasBYm9s3owALzCuJjGzUKcDHiO2DKu1xXAb0SzRcTzUCn
 x//0u+zd/R/QRUzLOw4N72/Hu+UG6MNt5iDZFCtapRaKt6OvSBwy8w==
 -----END RSA PRIVATE KEY-----`
 
+vi.mock('@actions/github')
+
+const setFailedMock: MockInstance<typeof core.setFailed> = vi.spyOn(core, 'setFailed')
+const getInputMock: MockInstance<typeof core.getInput> = vi.spyOn(core, 'getInput').mockImplementation(name => {
+  switch (name) {
+    case 'app_id':
+      return APP_ID
+    case 'private_key':
+      return PRIVATE_KEY
+    default:
+      return ''
+  }
+})
+
 describe('action', () => {
-  beforeEach(() => {
-    process.env['INPUT_APP_ID'] = APP_ID
-    process.env['INPUT_PRIVATE_KEY'] = PRIVATE_KEY
-    process.env['GITHUB_REPOSITORY'] = 'foo/bar'
+  afterEach(() => {
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
-  it.skip('retrieves the inputs correctly', async () => {
+  it('retrieves the inputs correctly', async () => {
+    const fetch = fetchMock.sandbox()
+
+    vi.doMock('node-fetch', () => {
+      return { default: fetch }
+    })
+
+    vi.doMock('@actions/github', () => ({
+      context: {
+        repo: {
+          owner: 'foo',
+          repo: 'bar'
+        }
+      }
+    }))
+
     const main = await import('../src/main')
     const runMock: MockInstance<typeof main.run> = vi.spyOn(main, 'run')
-    const getInputMock: MockInstance<typeof core.getInput> = vi.spyOn(core, 'getInput')
 
-    mock // prettier-ignore
+    // prettier-ignore
+    fetch
       .getOnce('path:/repos/foo/bar/installation', installationResponse)
       .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse)
       .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse)
@@ -75,13 +102,50 @@ describe('action', () => {
     expect(getInputMock).toHaveBeenCalledTimes(2)
     expect(getInputMock).toHaveBeenNthCalledWith(1, 'app_id')
     expect(getInputMock).toHaveBeenNthCalledWith(2, 'private_key')
+    expect(setFailedMock).not.toHaveBeenCalled()
   })
 
   it('handles push event correctly', async () => {
-    process.env['GITHUB_EVENT_NAME'] = 'push'
-    process.env['GITHUB_EVENT_PATH'] = path.join(__dirname, 'fixtures/push.json')
+    const fetch = fetchMock.sandbox()
 
-    mock // prettier-ignore
+    vi.doMock('node-fetch', () => {
+      return { default: fetch }
+    })
+
+    vi.doMock('@actions/github', () => ({
+      context: {
+        eventName: 'push',
+        repo: {
+          owner: 'foo',
+          repo: 'bar'
+        },
+        payload: {
+          commits: [
+            {
+              author: {
+                email: 'test@test.com',
+                name: 'test',
+                username: 'test'
+              },
+              committer: {
+                email: 'test@test.com',
+                name: 'test',
+                username: 'test'
+              },
+              distinct: true,
+              id: '40e93ef1c435e7eb172ec99c4695ae675d1b87c9',
+              message: 'test commit',
+              timestamp: '2024-08-12T13:56:13+01:00',
+              tree_id: 'c8b01f3068dd5869578c4c265b846ecbfcb20087',
+              url: 'https://github.com/foo/bar/commit/40e93ef1c435e7eb172ec99c4695ae675d1b87c9'
+            }
+          ]
+        }
+      }
+    }))
+
+    // prettier-ignore
+    fetch
       .getOnce('path:/repos/foo/bar/installation', installationResponse)
       .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse)
       .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse)
@@ -92,21 +156,14 @@ describe('action', () => {
       .postOnce('path:/repos/foo/bar/releases/generate-notes', generateNotesResponse)
       .post('path:/repos/foo/bar/releases', releaseResponse)
       .post('path:/graphql', updatePullRequestBranchResponse, updatePullRequestBranchMutation())
-      // eslint-disable-next-line github/no-then
-      .catch({
-        error: 'not found'
-      })
 
     const main = await import('../src/main')
     const runMock: MockInstance<typeof main.run> = vi.spyOn(main, 'run')
-    const setFailedMock: MockInstance<typeof core.setFailed> = vi.spyOn(core, 'setFailed')
-    const getFetchMock: MockInstance<typeof main.getFetch> = vi.spyOn(main, 'getFetch')
-    getFetchMock.mockImplementation(() => mock)
 
     await main.run()
-    // console.log(`calls: ${JSON.stringify(mock.calls(), null, 2)}`)
     expect(runMock).toHaveReturned()
 
+    // console.log(`calls: ${JSON.stringify(fetch.calls(), null, 2)}`)
     expect(setFailedMock).not.toHaveBeenCalled()
   })
 })

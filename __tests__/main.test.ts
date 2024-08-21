@@ -51,8 +51,6 @@ ZcJjRIt8w8g/s4X6MhKasBYm9s3owALzCuJjGzUKcDHiO2DKu1xXAb0SzRcTzUCn
 x//0u+zd/R/QRUzLOw4N72/Hu+UG6MNt5iDZFCtapRaKt6OvSBwy8w==
 -----END RSA PRIVATE KEY-----`
 
-vi.mock('@actions/github')
-
 const setFailedMock: MockInstance<typeof core.setFailed> = vi.spyOn(core, 'setFailed')
 const getInputMock: MockInstance<typeof core.getInput> = vi.spyOn(core, 'getInput').mockImplementation(name => {
   switch (name) {

@@ -102,7 +102,7 @@ describe('action', () => {
     // prettier-ignore
     fetch
       .getOnce('path:/repos/foo/bar/installation', installationResponse, { name: 'installation' })
-      .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse, { name: 'accesstokens' })
+      .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse, { name: 'accessTokens' })
       .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse, { name: 'config' })
 
     await main.run()
@@ -115,7 +115,7 @@ describe('action', () => {
 
     expect(fetch.calls()).to.have.length(3)
     expect(fetch.called('installation')).to.be.true
-    expect(fetch.called('accesstokens')).to.be.true
+    expect(fetch.called('accessTokens')).to.be.true
     expect(fetch.called('config')).to.be.true
   })
 
@@ -127,19 +127,19 @@ describe('action', () => {
     // prettier-ignore
     fetch
       .getOnce('path:/repos/foo/bar/installation', installationResponse, { name: 'installation' })
-      .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse, { name: 'accesstokens' })
+      .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse, { name: 'accessTokens' })
       .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse, { name: 'config' })
       .getOnce('path:/repos/foo/bar/commits/40e93ef1c435e7eb172ec99c4695ae675d1b87c9', commitResponse, { name:'commits' })
-      .postOnce('path:/graphql', findDraftReleaseBaseResponse, findDraftReleaseQuery({ name: 'finddraftrelease' }))
-      .postOnce('path:/graphql', createRefResponse, createRefMutation({ name: 'createref' }))
-      .postOnce('path:/graphql', getFileContentsResponse, getFileContents({ name: 'getfilecontents' }))
-      .postOnce('path:/graphql', createCommitOnBranchResponse, createCommitOnBranchMutation({ name: 'createcommitonbranch' }))
-      .postOnce('path:/graphql', createPullRequestResponse, createPullRequestMutation({ name: 'createpullrequest' }))
-      .postOnce('path:/graphql', updatePullRequestLabelsResponse, updatePullRequestLabelsMutation({ name: 'updatepullrequestlabels' }))
-      .getOnce('path:/repos/foo/bar/releases', releasesResponse, { name: 'listreleases' })
-      .post('path:/graphql', findLatestTagResponse, findLatestTagQuery({ name: 'findlatesttag', repeat: 2 }))
-      .postOnce('path:/repos/foo/bar/releases/generate-notes', generateNotesResponse, { name: 'generatenotes' })
-      .postOnce('path:/repos/foo/bar/releases', releaseResponse, { name: 'createrelease' })
+      .postOnce('path:/graphql', findDraftReleaseBaseResponse, findDraftReleaseQuery({ name: 'findDraftRelease' }))
+      .postOnce('path:/graphql', createRefResponse, createRefMutation({ name: 'createRef' }))
+      .postOnce('path:/graphql', getFileContentsResponse, getFileContents({ name: 'getFileContents' }))
+      .postOnce('path:/graphql', createCommitOnBranchResponse, createCommitOnBranchMutation({ name: 'createCommitOnBranch' }))
+      .postOnce('path:/graphql', createPullRequestResponse, createPullRequestMutation({ name: 'createPullRequest' }))
+      .postOnce('path:/graphql', updatePullRequestLabelsResponse, updatePullRequestLabelsMutation({ name: 'updatePullRequestLabels' }))
+      .getOnce('path:/repos/foo/bar/releases', releasesResponse, { name: 'listReleases' })
+      .post('path:/graphql', findLatestTagResponse, findLatestTagQuery({ name: 'findLatestTag', repeat: 2 }))
+      .postOnce('path:/repos/foo/bar/releases/generate-notes', generateNotesResponse, { name: 'generateNotes' })
+      .postOnce('path:/repos/foo/bar/releases', releaseResponse, { name: 'createRelease' })
 
     const main = await import('../src/main')
     const runMock: MockInstance<typeof main.run> = vi.spyOn(main, 'run')
@@ -150,19 +150,19 @@ describe('action', () => {
 
     expect(fetch.calls()).to.have.length(15)
     expect(fetch.called('installation')).to.be.true
-    expect(fetch.called('accesstokens')).to.be.true
+    expect(fetch.called('accessTokens')).to.be.true
     expect(fetch.called('config')).to.be.true
     expect(fetch.called('commits')).to.be.true
-    expect(fetch.called('finddraftrelease')).to.be.true
-    expect(fetch.called('createref')).to.be.true
-    expect(fetch.called('getfilecontents')).to.be.true
-    expect(fetch.called('createcommitonbranch')).to.be.true
-    expect(fetch.called('createpullrequest')).to.be.true
-    expect(fetch.called('updatepullrequestlabels')).to.be.true
-    expect(fetch.called('listreleases')).to.be.true
-    expect(fetch.called('findlatesttag')).to.be.true
-    expect(fetch.called('generatenotes')).to.be.true
-    expect(fetch.called('createrelease')).to.be.true
+    expect(fetch.called('findDraftRelease')).to.be.true
+    expect(fetch.called('createRef')).to.be.true
+    expect(fetch.called('getFileContents')).to.be.true
+    expect(fetch.called('createCommitOnBranch')).to.be.true
+    expect(fetch.called('createPullRequest')).to.be.true
+    expect(fetch.called('updatePullRequestLabels')).to.be.true
+    expect(fetch.called('listReleases')).to.be.true
+    expect(fetch.called('findLatestTag')).to.be.true
+    expect(fetch.called('generateNotes')).to.be.true
+    expect(fetch.called('createRelease')).to.be.true
   })
 
   it('handles push event with existing branch, existing pr and no release correctly', async () => {
@@ -173,15 +173,15 @@ describe('action', () => {
     // prettier-ignore
     fetch
       .getOnce('path:/repos/foo/bar/installation', installationResponse, { name: 'installation' })
-      .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse, { name: 'accesstokens' })
+      .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse, { name: 'accessTokens' })
       .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse, { name: 'config' })
       .getOnce('path:/repos/foo/bar/commits/40e93ef1c435e7eb172ec99c4695ae675d1b87c9', commitResponse, { name:'commits' })
-      .postOnce('path:/graphql', findDraftReleaseResponse, findDraftReleaseQuery({ name: 'finddraftrelease' }))
-      .getOnce('path:/repos/foo/bar/releases', releasesResponse, { name: 'listreleases' })
-      .post('path:/graphql', findLatestTagResponse, findLatestTagQuery({ name: 'findlatesttag', repeat: 2 }))
-      .postOnce('path:/repos/foo/bar/releases/generate-notes', generateNotesResponse, { name: 'generatenotes' })
-      .postOnce('path:/repos/foo/bar/releases', releaseResponse, { name: 'createrelease' })
-      .postOnce('path:/graphql', updatePullRequestBranchResponse, updatePullRequestBranchMutation({ name: 'updatepullrequestbranch' }))
+      .postOnce('path:/graphql', findDraftReleaseResponse, findDraftReleaseQuery({ name: 'findDraftRelease' }))
+      .getOnce('path:/repos/foo/bar/releases', releasesResponse, { name: 'listReleases' })
+      .post('path:/graphql', findLatestTagResponse, findLatestTagQuery({ name: 'findLatestTag', repeat: 2 }))
+      .postOnce('path:/repos/foo/bar/releases/generate-notes', generateNotesResponse, { name: 'generateNotes' })
+      .postOnce('path:/repos/foo/bar/releases', releaseResponse, { name: 'createRelease' })
+      .postOnce('path:/graphql', updatePullRequestBranchResponse, updatePullRequestBranchMutation({ name: 'updatePullRequestBranch' }))
 
     const main = await import('../src/main')
     const runMock: MockInstance<typeof main.run> = vi.spyOn(main, 'run')
@@ -192,14 +192,14 @@ describe('action', () => {
 
     expect(fetch.calls()).to.have.length(11)
     expect(fetch.called('installation')).to.be.true
-    expect(fetch.called('accesstokens')).to.be.true
+    expect(fetch.called('accessTokens')).to.be.true
     expect(fetch.called('config')).to.be.true
     expect(fetch.called('commits')).to.be.true
-    expect(fetch.called('finddraftrelease')).to.be.true
-    expect(fetch.called('listreleases')).to.be.true
-    expect(fetch.called('findlatesttag')).to.be.true
-    expect(fetch.called('generatenotes')).to.be.true
-    expect(fetch.called('createrelease')).to.be.true
-    expect(fetch.called('updatepullrequestbranch')).to.be.true
+    expect(fetch.called('findDraftRelease')).to.be.true
+    expect(fetch.called('listReleases')).to.be.true
+    expect(fetch.called('findLatestTag')).to.be.true
+    expect(fetch.called('generateNotes')).to.be.true
+    expect(fetch.called('createRelease')).to.be.true
+    expect(fetch.called('updatePullRequestBranch')).to.be.true
   })
 })

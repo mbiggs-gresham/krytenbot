@@ -1,5 +1,9 @@
 export const createCommitOnBranchResponse = (): object => ({
   data: {
-    ref: 1
+    createCommitOnBranch: {
+      ref: {
+        name: 'refs/heads/krytenbot-test'
+      }
+    }
   }
 })

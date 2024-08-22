@@ -1,7 +1,9 @@
 export const updatePullRequestLabelsResponse = (): object => ({
   data: {
-    pullRequest: {
-      id: 1
+    updatePullRequest: {
+      pullRequest: {
+        id: 1
+      }
     }
   }
 })

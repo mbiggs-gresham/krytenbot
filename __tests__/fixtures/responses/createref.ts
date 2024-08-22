@@ -1,5 +1,9 @@
 export const createRefResponse = (): object => ({
   data: {
-    ref: 1
+    createRef: {
+      ref: {
+        name: 'refs/heads/krytenbot-test'
+      }
+    }
   }
 })

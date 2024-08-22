@@ -29,6 +29,10 @@ import { getFileContents } from './fixtures/queries/getfilecontents'
 import { getFileContentsResponse } from './fixtures/responses/getfilecontents'
 import { createCommitOnBranchResponse } from './fixtures/responses/createcommitonbranch'
 import { createCommitOnBranchMutation } from './fixtures/mutations/createcommitonbranch'
+import { createPullRequestResponse } from './fixtures/responses/createpullrequest'
+import { createPullRequestMutation } from './fixtures/mutations/createpullrequest'
+import { updatePullRequestLabelsResponse } from './fixtures/responses/updatepullrequestlabels'
+import { updatePullRequestLabelsMutation } from './fixtures/mutations/updatepullrequestlabels'
 
 const APP_ID = '123'
 const PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
@@ -115,7 +119,7 @@ describe('action', () => {
     expect(fetch.called('config')).to.be.true
   })
 
-  it.skip('handles push event with no branch or pr correctly', async () => {
+  it('handles push event with no branch, no pr and no release correctly', async () => {
     const fetch = fetchMock.sandbox()
     vi.doMock('node-fetch', nodeFetchMock(fetch))
     vi.doMock('@actions/github', pushContext)
@@ -127,19 +131,15 @@ describe('action', () => {
       .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse, { name: 'config' })
       .getOnce('path:/repos/foo/bar/commits/40e93ef1c435e7eb172ec99c4695ae675d1b87c9', commitResponse, { name:'commits' })
       .postOnce('path:/graphql', findDraftReleaseBaseResponse, findDraftReleaseQuery({ name: 'finddraftrelease' }))
-
       .postOnce('path:/graphql', createRefResponse, createRefMutation({ name: 'createref' }))
       .postOnce('path:/graphql', getFileContentsResponse, getFileContents({ name: 'getfilecontents' }))
       .postOnce('path:/graphql', createCommitOnBranchResponse, createCommitOnBranchMutation({ name: 'createcommitonbranch' }))
-
-      // create pull request
-      // update pull request labels
-
+      .postOnce('path:/graphql', createPullRequestResponse, createPullRequestMutation({ name: 'createpullrequest' }))
+      .postOnce('path:/graphql', updatePullRequestLabelsResponse, updatePullRequestLabelsMutation({ name: 'updatepullrequestlabels' }))
       .getOnce('path:/repos/foo/bar/releases', releasesResponse, { name: 'listreleases' })
       .post('path:/graphql', findLatestTagResponse, findLatestTagQuery({ name: 'findlatesttag', repeat: 2 }))
       .postOnce('path:/repos/foo/bar/releases/generate-notes', generateNotesResponse, { name: 'generatenotes' })
       .postOnce('path:/repos/foo/bar/releases', releaseResponse, { name: 'createrelease' })
-      .postOnce('path:/graphql', updatePullRequestBranchResponse, updatePullRequestBranchMutation({ name: 'updatepullrequestbranch' }))
 
     const main = await import('../src/main')
     const runMock: MockInstance<typeof main.run> = vi.spyOn(main, 'run')
@@ -148,20 +148,24 @@ describe('action', () => {
     expect(runMock).toHaveReturned()
     expect(setFailedMock).not.toHaveBeenCalled()
 
-    expect(fetch.calls()).to.have.length(11)
+    expect(fetch.calls()).to.have.length(15)
     expect(fetch.called('installation')).to.be.true
     expect(fetch.called('accesstokens')).to.be.true
     expect(fetch.called('config')).to.be.true
     expect(fetch.called('commits')).to.be.true
     expect(fetch.called('finddraftrelease')).to.be.true
+    expect(fetch.called('createref')).to.be.true
+    expect(fetch.called('getfilecontents')).to.be.true
+    expect(fetch.called('createcommitonbranch')).to.be.true
+    expect(fetch.called('createpullrequest')).to.be.true
+    expect(fetch.called('updatepullrequestlabels')).to.be.true
     expect(fetch.called('listreleases')).to.be.true
     expect(fetch.called('findlatesttag')).to.be.true
     expect(fetch.called('generatenotes')).to.be.true
     expect(fetch.called('createrelease')).to.be.true
-    expect(fetch.called('updatepullrequestbranch')).to.be.true
   })
 
-  it('handles push event with existing branch and pr correctly', async () => {
+  it('handles push event with existing branch, existing pr and no release correctly', async () => {
     const fetch = fetchMock.sandbox()
     vi.doMock('node-fetch', nodeFetchMock(fetch))
     vi.doMock('@actions/github', pushContext)

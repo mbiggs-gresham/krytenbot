@@ -22,7 +22,7 @@ import { releaseResponse } from './fixtures/responses/release'
 import { updatePullRequestBranchMutation } from './fixtures/mutations/updatepullrequestbranch'
 import { updatePullRequestBranchResponse } from './fixtures/responses/updatepullrequestbranch'
 import { baseContext } from './fixtures/contexts/base'
-import { pushContext } from './fixtures/contexts/push'
+import { pushContext, pushReleaseContext } from './fixtures/contexts/push'
 import { createRefResponse } from './fixtures/responses/createref'
 import { createRefMutation } from './fixtures/mutations/createref'
 import { getFileContents } from './fixtures/queries/getfilecontents'
@@ -201,5 +201,29 @@ describe('action', () => {
     expect(fetch.called('generateNotes')).to.be.true
     expect(fetch.called('createRelease')).to.be.true
     expect(fetch.called('updatePullRequestBranch')).to.be.true
+  })
+
+  it('handles push event from a release and ignores it correctly', async () => {
+    const fetch = fetchMock.sandbox()
+    vi.doMock('node-fetch', nodeFetchMock(fetch))
+    vi.doMock('@actions/github', pushReleaseContext)
+
+    // prettier-ignore
+    fetch
+      .getOnce('path:/repos/foo/bar/installation', installationResponse, { name: 'installation' })
+      .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse, { name: 'accessTokens' })
+      .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse, { name: 'config' })
+
+    const main = await import('../src/main')
+    const runMock: MockInstance<typeof main.run> = vi.spyOn(main, 'run')
+
+    await main.run()
+    expect(runMock).toHaveReturned()
+    expect(setFailedMock).not.toHaveBeenCalled()
+
+    expect(fetch.calls()).to.have.length(3)
+    expect(fetch.called('installation')).to.be.true
+    expect(fetch.called('accessTokens')).to.be.true
+    expect(fetch.called('config')).to.be.true
   })
 })

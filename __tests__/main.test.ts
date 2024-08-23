@@ -15,10 +15,9 @@ import { commitResponse } from './fixtures/responses/commit'
 import { findDraftReleaseBaseResponse, findDraftReleaseResponse } from './fixtures/responses/finddraftrelease'
 import { findDraftReleaseQuery } from './fixtures/queries/finddraftrelease'
 import { findLatestTagQuery } from './fixtures/queries/findlatesttag'
-import { releasesResponse } from './fixtures/responses/releases'
+import { releasesCreatedResponse, releasesEmptyResponse, releasesPublishedResponse, releasesResponse } from './fixtures/responses/releases'
 import { findLatestTagResponse } from './fixtures/responses/findlatesttag'
 import { generateNotesResponse } from './fixtures/responses/generate-notes'
-import { releaseResponse } from './fixtures/responses/release'
 import { updatePullRequestBranchMutation } from './fixtures/mutations/updatepullrequestbranch'
 import { updatePullRequestBranchResponse } from './fixtures/responses/updatepullrequestbranch'
 import { baseContext } from './fixtures/contexts/base'
@@ -33,6 +32,7 @@ import { createPullRequestResponse } from './fixtures/responses/createpullreques
 import { createPullRequestMutation } from './fixtures/mutations/createpullrequest'
 import { updatePullRequestLabelsResponse } from './fixtures/responses/updatepullrequestlabels'
 import { updatePullRequestLabelsMutation } from './fixtures/mutations/updatepullrequestlabels'
+import { pullRequestContext } from './fixtures/contexts/pull_request'
 
 const APP_ID = '123'
 const PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
@@ -136,10 +136,10 @@ describe('action', () => {
       .postOnce('path:/graphql', createCommitOnBranchResponse, createCommitOnBranchMutation({ name: 'createCommitOnBranch' }))
       .postOnce('path:/graphql', createPullRequestResponse, createPullRequestMutation({ name: 'createPullRequest' }))
       .postOnce('path:/graphql', updatePullRequestLabelsResponse, updatePullRequestLabelsMutation({ name: 'updatePullRequestLabels' }))
-      .getOnce('path:/repos/foo/bar/releases', releasesResponse, { name: 'listReleases' })
+      .getOnce('path:/repos/foo/bar/releases', releasesEmptyResponse, { name: 'listReleases' })
       .post('path:/graphql', findLatestTagResponse, findLatestTagQuery({ name: 'findLatestTag', repeat: 2 }))
       .postOnce('path:/repos/foo/bar/releases/generate-notes', generateNotesResponse, { name: 'generateNotes' })
-      .postOnce('path:/repos/foo/bar/releases', releaseResponse, { name: 'createRelease' })
+      .postOnce('path:/repos/foo/bar/releases', releasesCreatedResponse, { name: 'createRelease' })
 
     const main = await import('../src/main')
     const runMock: MockInstance<typeof main.run> = vi.spyOn(main, 'run')
@@ -177,10 +177,10 @@ describe('action', () => {
       .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse, { name: 'config' })
       .getOnce('path:/repos/foo/bar/commits/40e93ef1c435e7eb172ec99c4695ae675d1b87c9', commitResponse, { name:'commits' })
       .postOnce('path:/graphql', findDraftReleaseResponse, findDraftReleaseQuery({ name: 'findDraftRelease' }))
-      .getOnce('path:/repos/foo/bar/releases', releasesResponse, { name: 'listReleases' })
+      .getOnce('path:/repos/foo/bar/releases', releasesEmptyResponse, { name: 'listReleases' })
       .post('path:/graphql', findLatestTagResponse, findLatestTagQuery({ name: 'findLatestTag', repeat: 2 }))
       .postOnce('path:/repos/foo/bar/releases/generate-notes', generateNotesResponse, { name: 'generateNotes' })
-      .postOnce('path:/repos/foo/bar/releases', releaseResponse, { name: 'createRelease' })
+      .postOnce('path:/repos/foo/bar/releases', releasesCreatedResponse, { name: 'createRelease' })
       .postOnce('path:/graphql', updatePullRequestBranchResponse, updatePullRequestBranchMutation({ name: 'updatePullRequestBranch' }))
 
     const main = await import('../src/main')
@@ -225,5 +225,36 @@ describe('action', () => {
     expect(fetch.called('installation')).to.be.true
     expect(fetch.called('accessTokens')).to.be.true
     expect(fetch.called('config')).to.be.true
+  })
+
+  it('handles pull_request closed event correctly', async () => {
+    const fetch = fetchMock.sandbox()
+    vi.doMock('node-fetch', nodeFetchMock(fetch))
+    vi.doMock('@actions/github', pullRequestContext)
+
+    // prettier-ignore
+    fetch
+      .getOnce('path:/repos/foo/bar/installation', installationResponse, { name: 'installation' })
+      .postOnce('path:/app/installations/123/access_tokens', accessTokenResponse, { name: 'accessTokens' })
+      .getOnce('path:/repos/foo/bar/contents/.github%2Fkrytenbot.yml', contentsResponse, { name: 'config' })
+      .getOnce('path:/repos/foo/bar/releases', releasesResponse, { name: 'listReleases' })
+      .postOnce('path:/graphql', findLatestTagResponse, findLatestTagQuery({ name: 'findLatestTag' }))
+      .postOnce('path:/repos/foo/bar/releases/generate-notes', generateNotesResponse, { name: 'generateNotes' })
+      .patchOnce('path:/repos/foo/bar/releases/1', releasesPublishedResponse, { name: 'publishRelease' })
+
+    const main = await import('../src/main')
+    const runMock: MockInstance<typeof main.run> = vi.spyOn(main, 'run')
+
+    await main.run()
+    expect(runMock).toHaveReturned()
+    expect(setFailedMock).not.toHaveBeenCalled()
+
+    expect(fetch.calls()).to.have.length(7)
+    expect(fetch.called('installation')).to.be.true
+    expect(fetch.called('accessTokens')).to.be.true
+    expect(fetch.called('config')).to.be.true
+    expect(fetch.called('listReleases')).to.be.true
+    expect(fetch.called('generateNotes')).to.be.true
+    expect(fetch.called('publishRelease')).to.be.true
   })
 })
